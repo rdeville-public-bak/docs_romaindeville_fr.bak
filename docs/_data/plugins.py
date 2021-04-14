@@ -447,11 +447,13 @@ def update_subrepo_logo_src(env:dict,curr_repo:dict,repo_name:str,subrepo_dict:d
     src_subpath = ""
     if external:
         logo_subpath = os.path.join(subrepo_dict["online_url"])
+    else:
+        logo_subpath = ".."
 
     src_subpath = os.path.join(path.replace(f"{env.project_dir}/",""),repo_name)
 
     if "logo" not in curr_repo:
-        curr_repo["logo"] = os.path.join(logo_subpath, "assets", "img", "meta",f"{repo_name}_logo.png")
+        curr_repo["logo"] = os.path.join(logo_subpath, "latest", "assets", "img", "meta",f"{repo_name}_logo.png")
     if "src_path" in curr_repo:
         for i_src in curr_repo["src_path"]:
             i_src = os.path.join(src_subpath, i_src)
