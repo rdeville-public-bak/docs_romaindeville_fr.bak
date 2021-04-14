@@ -204,6 +204,7 @@ extra:
   # Update alternate to provide language selector
   # see https://squidfunk.github.io/mkdocs-material/setup/changing-the-language/#site-language-selector
   #alternate:
+  #
 
 nav:
   - Home: index.md
