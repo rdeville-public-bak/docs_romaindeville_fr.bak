@@ -15,10 +15,7 @@ workflow:
   rules:
     # Do not run CI when commit title have
     # WIP, NO-CI or 🚧 (gitmoji for "work in progress", aka :construction:)
-    - if: |
-        $CI_COMMIT_TITLE =~ /.*WIP.*/ ||
-        $CI_COMMIT_TITLE =~ /.*NO-CI.*/ ||
-        $CI_COMMIT_TITLE =~ /.*🚧.*/
+    - if: $CI_COMMIT_TITLE =~ /.*(WIP|NO-CI|🚧|:construction:).*/
       when: never
     # Run the CI otherwise (depending on `rules` key per jobs)
     - when: always
@@ -355,11 +352,6 @@ script_deploy_html: &script_deploy_html
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}${LAST_TAG}"
     - mkdir -p "tmp/${RSYNC_PATH}"
-    - |
-      if [[ -f "site/versions.json" ]]
-      then
-        cp site/versions.json versions.json
-      fi
     - mv site/* "tmp/${RSYNC_PATH}/"
     - rsync -avz "tmp/" "${RSYNC_DEST}"
     - echo -e "
@@ -380,13 +372,18 @@ script_deploy_html: &script_deploy_html
       </body>\n
       </html>" > index.html
     - rsync -avz index.html "${RSYNC_DEST}${PROJECT_PATH}/"
-    - rsync -avz versions.json "${RSYNC_DEST}${PROJECT_PATH}/"
+    - |
+      if [[ -f "site/versions.json" ]]
+      then
+        cp site/versions.json versions.json
+        rsync -avz versions.json "${RSYNC_DEST}${PROJECT_PATH}/"
+      fi
   rules:
     - *rules_dev
     - *rules_pre_prod
     - *rules_prod
   variables:
-    PROJECT_PATH: ${CI_COMMIT_REF_NAME%-*}/$CI_PROJECT_PATH/
+    PROJECT_PATH: $CI_COMMIT_BRANCH/$CI_PROJECT_PATH/
 
 # Jobs in post_deploy stage
 # -----------------------------------------------------------------------------
@@ -395,7 +392,7 @@ trigger_main_repo:
   trigger:
     include:
       - project: $MAIN_PROJECT
-        ref: $CI_COMMIT_REF_NAME
+        ref: $CI_COMMIT_BRANCH
         file: $MAIN_PROJECT_CI_PATH/.gitlab-ci.yml
     strategy: depend
   variables:
