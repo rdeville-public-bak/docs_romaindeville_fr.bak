@@ -446,9 +446,10 @@ def update_subrepo_logo_src(env:dict,curr_repo:dict,repo_name:str,subrepo_dict:d
     logo_subpath = ""
     src_subpath = ""
     if external:
-        logo_subpath = os.path.join(subrepo_dict["online_url"])
-    else:
-        logo_subpath = ".."
+        if subrepo_dict["online_url"].startswith("/"):
+            logo_subpath = os.path.join("../",subrepo_dict["online_url"])
+        else:
+            logo_subpath = os.path.join(subrepo_dict["online_url"])
 
     src_subpath = os.path.join(path.replace(f"{env.project_dir}/",""),repo_name)
 
