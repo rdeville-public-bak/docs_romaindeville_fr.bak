@@ -104,6 +104,10 @@ variables:
         then
           export RSYNC_DEST="${RSYNC_DEST_DEV}"
         fi
+        if [[ -n "${RSYNC_BASE_PATH_DEV}" ]];
+        then
+          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_DEV}"
+        fi
       ;;
       "PRE_PROD")
         if [[ -n "${SSH_KNOWN_HOSTS_PRE_PROD}" ]];
@@ -122,6 +126,10 @@ variables:
         then
           export RSYNC_DEST="${RSYNC_DEST_PRE_PROD}"
         fi
+        if [[ -n "${RSYNC_BASE_PATH_PRE_PROD}" ]];
+        then
+          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_PRE_PROD}"
+        fi
       ;;
       "PROD")
         if [[ -n "${SSH_KNOWN_HOSTS_PROD}" ]];
@@ -139,6 +147,10 @@ variables:
         if [[ -n "${RSYNC_DEST_PROD}" ]];
         then
           export RSYNC_DEST="${RSYNC_DEST_PROD}"
+        fi
+        if [[ -n "${RSYNC_BASE_PATH_PROD}" ]];
+        then
+          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_PROD}"
         fi
       ;;
       *)
@@ -357,17 +369,19 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="$(git describe --tags `git rev-list --tags --max-count=1`)"
     - export LAST_TAG="${LAST_TAG/v/}"
     - export LAST_TAG="${LAST_TAG%.*}"
-    - if [[ "${RSYNC_BASE_PATH}" == "" ]];
+    - if [[ -z "${RSYNC_BASE_PATH}" ]];
       then
-        export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${CI_PROJECT_PATH}/";
-      else
         export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
+      else
+        export PROJECT_PATH="/${CI_COMMIT_BRANCH}/";
       fi
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
-    - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}/${LAST_TAG}"
+    - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}latest"
     - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
     - mv site/* "tmp/${RSYNC_PATH}/"
+    - ln -s "latest" "${LAST_TAG}"
+    - mv "latest" "tmp/${PROJECT_PATH}"
     - rsync -avz "tmp/" "${RSYNC_DEST}"
     - echo -e "
       <!DOCTYPE html>\n
