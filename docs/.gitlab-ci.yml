@@ -391,6 +391,8 @@ test_build:
     - mkdocs build -d site_monorepo
     # If everything went right, remove build site
     - rm -rf site_monorepo
+  variables:
+    CI_DEPLOY_TYPE: "DEV"
 
 # Jobs in build stage
 # -----------------------------------------------------------------------------
