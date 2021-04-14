@@ -363,6 +363,7 @@ test_build_local:
   <<: *cache_python
   <<: *stage_test
   before_script:
+    - *before_script_export_variable
     - *before_script_python_dependencies
   script:
     # Install python test requirements
@@ -381,6 +382,7 @@ test_build:
   <<: *cache_python
   <<: *stage_test
   before_script:
+    - *before_script_export_variable
     - *before_script_python_dependencies
   script:
     # Install python test requirements
