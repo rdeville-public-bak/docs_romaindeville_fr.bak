@@ -28,7 +28,7 @@ theme:
   # https://squidfunk.github.io/mkdocs-material/
   name: material
   # Overriding parent theme configuration
-  custom_dir: docs/theme
+  #custom_dir: docs/theme
   # Determines whether the search plugin expects the theme to provide a
   # dedicated search page via a template located at search/search.html.
   include_search_page: false
