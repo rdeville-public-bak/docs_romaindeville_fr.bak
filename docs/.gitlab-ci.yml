@@ -149,6 +149,7 @@ variables:
         return 1
       ;;
     esac
+    echo "$CI_COMMIT_BRANCH"
 
 # Only anchors
 # -----------------------------------------------------------------------------
