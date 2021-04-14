@@ -150,18 +150,26 @@ variables:
 # Rules anchors
 # -----------------------------------------------------------------------------
 # https://docs.gitlab.com/ee/ci/yaml/README.html#rules
+# Defining bash regexp test
+.rules_regexp:
+  - &rules_regexp_dev $CI_COMMIT_BRANCH =~ /^((release|feature|hotfix|bugfix)-|merge_request_)*/
+  - &rules_regexp_pre_prod $CI_COMMIT_BRANCH =~ /(develop|master)/
+  - &rules_regexp_prod $CI_COMMIT_TAG
+
+# Defining rules that now replace only to run jobs under specific condition
+# and define variables
 .rules_dev: &rules_dev
-  if: $CI_COMMIT_BRANCH =~ /^((release|feature|hotfix|bugfix)-|merge_request_)*/
+  if: *rules_regexp_dev
   variables:
     CI_DEPLOY_TYPE: "DEV"
 
 .rules_pre_prod: &rules_pre_prod
-  if: $CI_COMMIT_BRANCH =~ /(develop|master)/
+  if: *rules_regexp_pre_prod
   variables:
     CI_DEPLOY_TYPE: "PRE_PROD"
 
 .rules_prod: &rules_prod
-  if: $CI_COMMIT_TAG
+  if: *rules_regexp_prod
   variables:
     CI_DEPLOY_TYPE: "PROD"
 
@@ -351,6 +359,7 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="${LAST_TAG%.*}"
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}${LAST_TAG}"
+    - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
     - mv site/* "tmp/${RSYNC_PATH}/"
     - rsync -avz "tmp/" "${RSYNC_DEST}"
@@ -382,8 +391,11 @@ script_deploy_html: &script_deploy_html
     - *rules_dev
     - *rules_pre_prod
     - *rules_prod
+    - if: RSYNC_BASE_PATH
+      variable:
+        PROJECT_PATH: /$CI_COMMIT_BRANCH/$RSYNC_BASE_PATH/
   variables:
-    PROJECT_PATH: $CI_COMMIT_BRANCH/$CI_PROJECT_PATH/
+    PROJECT_PATH: /$CI_COMMIT_BRANCH/$CI_PROJECT_PATH/
 
 # Jobs in post_deploy stage
 # -----------------------------------------------------------------------------
