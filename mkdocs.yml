@@ -193,13 +193,14 @@ plugins:
 ## Extra Data Information & Customization
 # ---------------------------------------------------------------------------
 # Dictionary storing social icon that will be shown on the bottom right.
-#extra:
+extra:
   # Update social to provide icon on the bottom right of the page
   # see https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#social-links
   #social:
   # Update version mamanger to provide version selector
   # see https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
-  #version:
+  version:
+    provider: mike
   # Update alternate to provide language selector
   # see https://squidfunk.github.io/mkdocs-material/setup/changing-the-language/#site-language-selector
   #alternate:
