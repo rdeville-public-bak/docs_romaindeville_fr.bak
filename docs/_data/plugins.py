@@ -612,7 +612,6 @@ def update_version(env: dict) -> None:
         os.path.join(env.project_dir, "docs", "versions.json"), "w"
     ) as version_file:
         json.dump(mike_version, version_file, indent=2)
-    os.symlink(os.path.join(env.project_dir,"docs",f"{last_major}.{last_minor}"),os.path.join(env.project_dir,"docs","latest"))
 
 
 def define_env(env: dict) -> None:
