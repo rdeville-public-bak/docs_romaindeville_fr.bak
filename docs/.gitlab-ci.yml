@@ -394,7 +394,7 @@ script_deploy_html: &script_deploy_html
     - if: $RSYNC_BASE_PATH
       variables:
         PROJECT_PATH: /$CI_COMMIT_BRANCH/$RSYNC_BASE_PATH/
-    - if: ! $RSYNC_BASE_PATH
+    - if: $RSYNC_BASE_PATH == ""
       variables:
         PROJECT_PATH: /$CI_COMMIT_BRANCH/$CI_PROJECT_PATH/
 
