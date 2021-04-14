@@ -369,22 +369,22 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="$(git describe --tags `git rev-list --tags --max-count=1`)"
     - export LAST_TAG="${LAST_TAG/v/}"
     - export LAST_TAG="${LAST_TAG%.*}"
-    - if [[ -z "${RSYNC_BASE_PATH}" ]]
+    - if [[ -z "${RSYNC_BASE_PATH}" ]];
       then
         case "${CI_DEPLOY_TYPE}" in
-          DEV|PRE_PROD)
+          "DEV|PRE_PROD")
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
             ;;
-          PROD)
+          "PROD")
             export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
             ;;
         esac
       else
         case "${CI_DEPLOY_TYPE}" in
-          DEV|PRE_PROD)
+          "DEV|PRE_PROD")
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/;
             ;;
-          PROD)
+          "PROD")
             export PROJECT_PATH="";
             ;;
         esac
