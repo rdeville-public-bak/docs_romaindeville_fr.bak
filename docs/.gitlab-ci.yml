@@ -20,7 +20,7 @@ workflow:
         $CI_COMMIT_TITLE =~ /.*NO-CI.*/ ||
         $CI_COMMIT_TITLE =~ /.*🚧.*/
       when: never
-    # Run the CI otherwise (depending on `only/except` key per jobs)
+    # Run the CI otherwise (depending on `rules` key per jobs)
     - when: always
 
 # Stages jobs will pass through with anchors to avoid updating stage in multiple
@@ -149,16 +149,10 @@ variables:
         return 1
       ;;
     esac
-    echo "$CI_COMMIT_BRANCH"
 
-# Only anchors
+# Rules anchors
 # -----------------------------------------------------------------------------
-# https://docs.gitlab.com/ee/ci/yaml/README.html#only
-# List all names of refs that can be used with key (only|except):refs using
-# anchors to avoid having to modify multiple times. Refs are:
-# - Branches names based on git flow: https://danielkummer.github.io/git-flow-cheatsheet/
-# - merge_requests (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
-# - tags (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
+# https://docs.gitlab.com/ee/ci/yaml/README.html#rules
 .rules_dev: &rules_dev
   if: $CI_COMMIT_BRANCH =~ /^((release|feature|hotfix|bugfix)-|merge_request_)*/
   variables:
@@ -173,52 +167,6 @@ variables:
   if: $CI_COMMIT_TAG
   variables:
     CI_DEPLOY_TYPE: "PROD"
-
-.refs_names:
-  - &ref_release /release-*/
-  - &ref_feature /feature-*/
-  - &ref_hotfix /hotfix-*/
-  - &ref_bugfix /bugfix-*/
-  - &ref_develop develop
-  - &ref_master master
-  - &ref_merge_requests merge_requests
-  - &ref_tags tags
-
-# Specify on which branch, tags or on merge_requests CI should be done.
-# Jobs under only_dev anchor will be run if branch name are compliant with git
-# flow branch which are not `develop` neither `master` and will be run on
-# merge_request
-.only_dev: &only_dev
-  only:
-    refs:
-      - *ref_release
-      - *ref_feature
-      - *ref_hotfix
-      - *ref_bugfix
-      - *ref_merge_requests
-
-# Jobs under only_pre_prod anchor will be run on `develop` (i.e. pre-release)
-# and `master` (release) branch.
-.only_pre_prod: &only_pre_prod
-  only:
-    refs:
-      - *ref_develop
-      - *ref_master
-
-# Jobs under only_prod anchor will be run on tagged commit.
-.only_prod: &only_prod
-  only:
-    refs:
-      - *ref_tags
-
-# Jobs under only_trigger anchor will be run on `develop` (i.e. pre-release)
-# `master` (release) branch and tagged commit.
-.only_trigger: &only_trigger
-  only:
-    refs:
-      - *ref_develop
-      - *ref_master
-      - *ref_tags
 
 # Tag anchors
 # -----------------------------------------------------------------------------
@@ -331,29 +279,8 @@ script_pre_test_ensure_variable: &script_pre_test_ensure_variable
       fi
   rules:
     - *rules_dev
-      #- *rules_pre_prod
-      #- *rules_prod
-
-# # Set variables for the dev branches CI.
-# pre_test_dev:
-#   <<: *script_pre_test_ensure_variable
-#   <<: *only_dev
-#   variables:
-#     CI_DEPLOY_TYPE: "DEV"
-#
-# # Set variables for the pre-prod branches CI (master and develop).
-# pre_test_pre_prod:
-#   <<: *script_pre_test_ensure_variable
-#   <<: *only_pre_prod
-#   variables:
-#     CI_DEPLOY_TYPE: "PRE_PROD"
-#
-# # Set variables for the prod CI, i.e. CI on tags.
-# pre_test_prod:
-#   <<: *script_pre_test_ensure_variable
-#   <<: *only_prod
-#   variables:
-#     CI_DEPLOY_TYPE: "PROD"
+    - *rules_pre_prod
+    - *rules_prod
 
 # Jobs in test stage
 # -----------------------------------------------------------------------------
@@ -363,7 +290,6 @@ test_build_local:
   <<: *cache_python
   <<: *stage_test
   before_script:
-    - *before_script_export_variable
     - *before_script_python_dependencies
   script:
     # Install python test requirements
@@ -382,7 +308,6 @@ test_build:
   <<: *cache_python
   <<: *stage_test
   before_script:
-    - *before_script_export_variable
     - *before_script_python_dependencies
   script:
     # Install python test requirements
@@ -391,8 +316,6 @@ test_build:
     - mkdocs build -d site_monorepo
     # If everything went right, remove build site
     - rm -rf site_monorepo
-  variables:
-    CI_DEPLOY_TYPE: "DEV"
 
 # Jobs in build stage
 # -----------------------------------------------------------------------------
@@ -458,36 +381,17 @@ build_html:
       </html>" > index.html
     - rsync -avz index.html "${RSYNC_DEST}${PROJECT_PATH}/"
     - rsync -avz versions.json "${RSYNC_DEST}${PROJECT_PATH}/"
-
-deploy_html_dev:
-  <<: *script_deploy_html
-  <<: *only_dev
+  rules:
+    - *rules_dev
+    - *rules_pre_prod
+    - *rules_prod
   variables:
-    CI_DEPLOY_TYPE: "DEV"
-    PROJECT_PATH: ${CI_COMMIT_REF_NAME%-*}/$CI_PROJECT_PATH/
-
-deploy_html_pre_prod:
-  <<: *script_deploy_html
-  <<: *only_pre_prod
-  variables:
-    CI_DEPLOY_TYPE: "PRE_PROD"
-    PROJECT_PATH: ${CI_COMMIT_REF_NAME%-*}/$CI_PROJECT_PATH/
-
-deploy_html_prod:
-  <<: *script_deploy_html
-  <<: *only_prod
-  variables:
-    CI_DEPLOY_TYPE: "PROD"
     PROJECT_PATH: ${CI_COMMIT_REF_NAME%-*}/$CI_PROJECT_PATH/
 
 # Jobs in post_deploy stage
 # -----------------------------------------------------------------------------
 trigger_main_repo:
   <<: *stage_post_deploy
-  <<: *only_trigger
-  only:
-    variables:
-      - $MAIN_PROJECT && $MAIN_PROJECT != $CI_PROJECT_PATH
   trigger:
     include:
       - project: $MAIN_PROJECT
@@ -496,12 +400,15 @@ trigger_main_repo:
     strategy: depend
   variables:
     MAIN_PROJECT_CI_PATH: ${MAIN_PROJECT_CI_PATH:-"."}
+  rules:
+    - *rules_pre_prod
+    - *rules_prod
+    - if: $MAIN_PROJECT && $MAIN_PROJECT != $CI_PROJECT_PATH
 
 inform_triggers_variables:
   <<: *tag_docker
   <<: *image_docker
   <<: *stage_post_deploy
-  <<: *only_trigger
   except:
     variables:
       - $MAIN_PROJECT
@@ -518,6 +425,10 @@ inform_triggers_variables:
           INFO - the path to the file \`gitlab-ci.yaml\` to be run in  \n
           INFO - the \`MAIN_PROJECT\`."
       fi
+  rules:
+    - *rules_pre_prod
+    - *rules_prod
+    - if: ! $MAIN_PROJECT
 
 # *****************************************************************************
 # VIM MODELINE
