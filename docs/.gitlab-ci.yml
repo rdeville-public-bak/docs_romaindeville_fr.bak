@@ -358,11 +358,11 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="${LAST_TAG/v/}"
     - export LAST_TAG="${LAST_TAG%.*}"
     - |
-      if [[ -n "${RSYNC_BASE_PATH}" ]];
+      if [[ "${RSYNC_BASE_PATH}" == "" ]];
       then
-        export PROJECT_PATH = /${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/;
-      else
         export PROJECT_PATH = /${CI_COMMIT_BRANCH}/${CI_PROJECT_PATH}/;
+      else
+        export PROJECT_PATH = /${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/;
       fi
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}${LAST_TAG}"
