@@ -357,6 +357,13 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="$(git describe --tags `git rev-list --tags --max-count=1`)"
     - export LAST_TAG="${LAST_TAG/v/}"
     - export LAST_TAG="${LAST_TAG%.*}"
+    - |
+      if [[ -n "${RSYNC_BASE_PATH}" ]];
+      then
+        export PROJECT_PATH = /${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/;
+      else
+        export PROJECT_PATH = /${CI_COMMIT_BRANCH}/${CI_PROJECT_PATH}/;
+      fi
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}${LAST_TAG}"
     - echo "$PROJECT_PATH"
@@ -391,12 +398,6 @@ script_deploy_html: &script_deploy_html
     - *rules_dev
     - *rules_pre_prod
     - *rules_prod
-    - if: $RSYNC_BASE_PATH != ""
-      variables:
-        PROJECT_PATH: /$CI_COMMIT_BRANCH/$RSYNC_BASE_PATH/
-    - if: $RSYNC_BASE_PATH == ""
-      variables:
-        PROJECT_PATH: /$CI_COMMIT_BRANCH/$CI_PROJECT_PATH/
 
 # Jobs in post_deploy stage
 # -----------------------------------------------------------------------------
