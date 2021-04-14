@@ -376,7 +376,7 @@ script_deploy_html: &script_deploy_html
           then
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
           else
-            export PROJECT_PATH="/${CI_COMMIT_BRANCH}/;
+            export PROJECT_PATH="/${CI_COMMIT_BRANCH}/
           fi
           ;;
         "PROD")
@@ -384,7 +384,7 @@ script_deploy_html: &script_deploy_html
           then
             export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
           else
-            export PROJECT_PATH="";
+            export PROJECT_PATH=""
           fi
           ;;
       esac
