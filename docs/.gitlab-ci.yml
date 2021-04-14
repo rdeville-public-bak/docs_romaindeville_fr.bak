@@ -380,7 +380,7 @@ script_deploy_html: &script_deploy_html
     - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
     - mv site/* "tmp/${RSYNC_PATH}/"
-    - ln -s "latest" "${LAST_TAG}"
+    - ln -s "${LAST_TAG}" "latest"
     - mv "latest" "tmp/${PROJECT_PATH}"
     - rsync -avz "tmp/" "${RSYNC_DEST}"
     - echo -e "
