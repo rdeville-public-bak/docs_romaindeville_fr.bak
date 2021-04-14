@@ -160,7 +160,7 @@ variables:
 # - merge_requests (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
 # - tags (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
 .rules_dev: &rules_dev
-  - if: '$CI_COMMIT_BRANCH =~ /release-*|feature-*|hotfix-*|bugfix-*|merge_requests_event/'
+  - if: $CI_COMMIT_BRANCH =~ /^(release|feature|hotfix|bugfix)/
     variables:
       CI_DEPLOY_TYPE: "DEV"
 
@@ -331,8 +331,8 @@ variables:
       fi
   rules:
     - *rules_dev
-    - *rules_pre_prod
-    - *rules_prod
+      #- *rules_pre_prod
+      #- *rules_prod
 
 # # Set variables for the dev branches CI.
 # pre_test_dev:
