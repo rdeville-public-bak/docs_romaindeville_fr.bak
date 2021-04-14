@@ -391,7 +391,7 @@ script_deploy_html: &script_deploy_html
     - *rules_dev
     - *rules_pre_prod
     - *rules_prod
-    - if: RSYNC_BASE_PATH
+    - if: $RSYNC_BASE_PATH
       variables:
         PROJECT_PATH: /$CI_COMMIT_BRANCH/$RSYNC_BASE_PATH/
   variables:
