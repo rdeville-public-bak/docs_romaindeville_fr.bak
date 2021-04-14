@@ -371,19 +371,23 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="${LAST_TAG%.*}"
     - if [[ -z "${RSYNC_BASE_PATH}" ]]
       then
-        if [[ "${CI_DEPLOY_TYPE}" =~ (DEV|PRE_PROD) ]];
-        then
-          export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
-        else
-          export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
-        fi
+        case "${CI_DEPLOY_TYPE}" in
+          DEV|PRE_PROD)
+            export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
+            ;;
+          PROD)
+            export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
+            ;;
+        esac
       else
-        if [[ "${CI_DEPLOY_TYPE}" =~ (DEV|PRE_PROD) ]];
-        then
-          export PROJECT_PATH="/${CI_COMMIT_BRANCH}/";
-        else
-          export PROJECT_PATH="";
-        fi
+        case "${CI_DEPLOY_TYPE}" in
+          DEV|PRE_PROD)
+            export PROJECT_PATH="/${CI_COMMIT_BRANCH}/;
+            ;;
+          PROD)
+            export PROJECT_PATH="";
+            ;;
+        esac
       fi
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}latest"
