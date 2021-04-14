@@ -364,7 +364,7 @@ script_deploy_html: &script_deploy_html
         export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
       fi
     - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
-    - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}${LAST_TAG}"
+    - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}/${LAST_TAG}"
     - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
     - mv site/* "tmp/${RSYNC_PATH}/"
