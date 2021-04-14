@@ -409,9 +409,6 @@ inform_triggers_variables:
   <<: *tag_docker
   <<: *image_docker
   <<: *stage_post_deploy
-  except:
-    variables:
-      - $MAIN_PROJECT
   script:
     - |
       if [[ -z "${MAIN_PROJECT}" ]]
