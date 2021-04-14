@@ -291,7 +291,7 @@ variables:
 # Jobs in pre_test stage
 # -----------------------------------------------------------------------------
 # Template jobs script to ensure required variables are sets.
-.script_pre_test_ensure_variable: &script_pre_test_ensure_variable
+script_pre_test_ensure_variable: &script_pre_test_ensure_variable
   <<: *tag_docker
   <<: *image_docker
   <<: *stage_pre_test
