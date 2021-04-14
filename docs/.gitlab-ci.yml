@@ -388,7 +388,6 @@ script_deploy_html: &script_deploy_html
           fi
           ;;
         "PROD")
-        "PROD")
           if [[ -n "${RSYNC_BASE_PATH}" ]];
           then
             export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
