@@ -295,9 +295,7 @@ def set_copyright(env, git_repo):
             first_year = time.strftime("%Y", time.localtime())
         curr_year = time.strftime("%Y", time.localtime())
 
-        env.conf["copyright"] = "Copyright &copy; {} - {} {}".format(
-            first_year, curr_year, env.variables["copyright"]
-        )
+        env.conf["copyright"] = f"Copyright &copy; {first_year} - {curr_year} {env.variables['copyright']}"
 
 
 def set_repo_name(env, repo_slug):
@@ -337,10 +335,7 @@ def set_repo_url(env, repo_slug):
         if "repo_url" in env.variables:
             env.conf["repo_url"] = env.variables["repo_url"]
         elif "repo_url" in env.conf:
-            env.conf["repo_url"] = "{}{}".format(
-                env.variables["git_platform"]["url"],
-                env.variables[repo_slug]["git_slug_with_namespace"],
-            )
+            env.conf["repo_url"] = f"{env.variables['git_platform']['url']}{env.variables[repo_slug]['git_slug_with_namespace']}"
 
 
 def update_theme(env, repo_slug):
@@ -586,10 +581,8 @@ def update_version(env: dict) -> None:
         if major > last_major:
             mike_version.append(
                 {
-                    "version": "{}.{}".format(last_major, last_minor),
-                    "title": "{}.{}.{}".format(
-                        last_major, last_minor, last_patch
-                    ),
+                    "version": f"{last_major}.{last_minor}",
+                    "title": f"{last_major}.{last_minro}.{last_patch}",
                     "aliases": [],
                 }
             )
@@ -598,10 +591,8 @@ def update_version(env: dict) -> None:
         if minor > last_minor:
             mike_version.append(
                 {
-                    "version": "{}.{}".format(last_major, last_minor),
-                    "title": "{}.{}.{}".format(
-                        last_major, last_minor, last_patch
-                    ),
+                    "version": f"{last_major}.{last_minor}",
+                    "title": f"{last_major}.{last_minor}.{last_patch}",
                     "aliases": [],
                 }
             )
@@ -611,8 +602,8 @@ def update_version(env: dict) -> None:
             last_patch = patch
     mike_version.append(
         {
-            "version": "{}.{}".format(last_major, last_minor),
-            "title": "{}.{}.{}".format(last_major, last_minor, last_patch),
+            "version": f"{last_major}.{last_minor}",
+            "title": f"{last_major}.{last_minor}.{last_patch}",
             "aliases": ["latest"],
         }
     )
@@ -621,6 +612,7 @@ def update_version(env: dict) -> None:
         os.path.join(env.project_dir, "docs", "versions.json"), "w"
     ) as version_file:
         json.dump(mike_version, version_file, indent=2)
+    os.symlink(os.path.join(env.project_dir,"docs",f"{last_major}.{last_minor}"),os.path.join(env.project_dir,"docs","latest"))
 
 
 def define_env(env: dict) -> None:

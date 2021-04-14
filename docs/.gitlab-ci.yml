@@ -371,7 +371,7 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="${LAST_TAG%.*}"
     - |
       case "${CI_DEPLOY_TYPE}" in
-        "DEV|PRE_PROD")
+        "DEV"|"PRE_PROD")
           if [[ -n "${RSYNC_BASE_PATH}" ]];
           then
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
@@ -384,11 +384,11 @@ script_deploy_html: &script_deploy_html
           then
             export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
           else
-            export PROJECT_PATH=""
+            export PROJECT_PATH="/"
           fi
           ;;
       esac
-    - export RSYNC_PATH="/${PROJECT_PATH}${LAST_TAG}"
+    - export RSYNC_PATH="${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}latest"
     - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
