@@ -1,0 +1,211 @@
+### BEGIN MKDOCS TEMPLATE ###
+# ---------------------------------------------------------------------------
+# Below content is automatically managed with repo mkdocs_template.
+# Do not edit manually
+# ---------------------------------------------------------------------------
+
+# Website Information
+# ---------------------------------------------------------------------------
+site_name: ""      # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+#site_description: # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+#site_url:         # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+#copyright:        # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+docs_dir: docs
+
+# Repository Information
+# ---------------------------------------------------------------------------
+#repo_name: # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+#repo_url:  # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+edit_uri: ""
+# This setting controls the style used for linking to pages within the
+# documentation.
+use_directory_urls: false
+
+# Theme Configuration
+# ---------------------------------------------------------------------------
+theme:
+  # Using mkdocs-material theme
+  # https://squidfunk.github.io/mkdocs-material/
+  name: material
+  # Overriding parent theme configuration
+  custom_dir: docs/theme
+  # Determines whether the search plugin expects the theme to provide a
+  # dedicated search page via a template located at search/search.html.
+  include_search_page: false
+  # Determines whether the search plugin should only generate a search
+  # index or a complete search solution.
+  search_index_only: true
+  # Language site
+  language: en
+  # Optional features like tabs and instant loading are now implemented
+  # as flags and can be enabled by listing them in mkdocs.yml under
+  # theme.features:
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.top
+  # Setting colors palette
+  palette:
+      # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep-purple
+      accent: yellow
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep-purple
+      accent: yellow
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  # Font configuration for the website
+  font: false
+  #  text:
+  #  code:
+  # Path to logo and icons to use for the website
+  #logo:    # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+  #icon:
+  #  repo:  # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+  #favicon: # Automatically set by mkdocs_macros_plugin (see docs/_data/plugins.py)
+
+# Extensions
+# ---------------------------------------------------------------------------
+markdown_extensions:
+  - markdown_include.include:
+      base_path: ./
+  # Python Markdown Extensions
+  # https://python-markdown.github.io/extensions/
+  - markdown.extensions.toc:
+      slugify: !!python/name:pymdownx.slugs.uslugify
+      permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.meta:
+  - markdown.extensions.md_in_html:
+  # Pymdown Extensions
+  # https://facelessuser.github.io/pymdown-extensions/extensions/arithmatex/
+  - pymdownx.betterem:
+  - pymdownx.tabbed:
+  - pymdownx.superfences:
+      preserve_tabs: true
+      # Make exceptions to highlighting code of following classes:
+      custom_fences:
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.inline_mathjax_format
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.critic:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      options:
+        custom_icons:
+          - .icons
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.progressbar:
+  - pymdownx.arithmatex:
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
+
+# Plugins
+# ---------------------------------------------------------------------------
+plugins:
+  - search:
+    # https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
+    # MkDocs plugin that enables displaying the date of the last git
+    # modification of a page.
+  - git-revision-date-localized:
+      locale: en
+      fallback_to_build_date: true
+    # https://github.com/oprypin/mkdocs-section-index
+    # MkDocs plugin to allow clickable sections that lead to an index page
+  - section-index:
+    # https://github.com/apenwarr/mkdocs-exclude
+    # A mkdocs plugin that lets you exclude files or trees.
+  - exclude:
+      regex:
+        - .*theme.*.md
+    # https://github.com/fralau/mkdocs_macros_plugin
+    # Unleash the power of MkDocs with variables and macros
+  - macros:
+      module_name: docs/_data/plugins
+      include_dir: ./
+      include_yaml:
+        - docs/_data/vars.yaml
+        # Others yaml include are done automatically using
+        # mkdocs_macros_plugin (see docs/_data/plugins.py)
+    # https://spotify.github.io/mkdocs-monorepo-plugin/
+    # This plugin enables you to build multiple sets of documentation in a
+    # single Mkdocs.
+  - monorepo:
+    # https://pawamoy.github.io/mkdocstrings/
+    # Automatic documentation from sources, for MkDocs.
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+            show_if_no_docstring: true
+          setup_commands:
+            - import sys
+            # Others command such as sys.path.append("path") are
+            # Automatically added using mkdocs_macros_plugin
+            # (see docs/_data/plugins.py)
+# DO NOT FORGET TO ADD/UPDATE THE \`nav\` AND \`extra\` KEYS BELOW.
+### END MKDOCS TEMPLATE ###
+
+## Extra Data Information & Customization
+# ---------------------------------------------------------------------------
+# Dictionary storing social icon that will be shown on the bottom right.
+#extra:
+  # Update social to provide icon on the bottom right of the page
+  # see https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#social-links
+  #social:
+  # Update version mamanger to provide version selector
+  # see https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
+  #version:
+  # Update alternate to provide language selector
+  # see https://squidfunk.github.io/mkdocs-material/setup/changing-the-language/#site-language-selector
+  #alternate:
+
+nav:
+  - Home: index.md
+  - About:
+    - about/index.md
+    - Data Privacy: about/data_privacy.md
