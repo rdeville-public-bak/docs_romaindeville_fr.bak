@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # Schema to validate yaml files describing repo information
 type: map
 mapping:
@@ -44,5 +44,5 @@ mapping:
                 required: true
                 example: >-
                   Key `name` and `mail` are string and are required.
-
 ### END MKDOCS TEMPLATE ###
+

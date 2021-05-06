@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # Extra Data Information & Customization
 # ===========================================================================
 # Dictionnary storing variables to be used as "Jinja2" variables within
@@ -28,7 +28,7 @@
 # The name or company which old the copyright. No need to specify any date
 # as it will be built based on the first commit of your repo. If not specify,
 # then no copyright will be shown on the footer of the documentation.
-#copyright: "Firstname Lastname"
+copyright: "Romain Deville"
 
 # Name of your repo, if not specified, will be the key `mkdocs_repo_name` in
 # `_data/repo_name.yaml` If value is EXACTLY "!!git_platform", then the value
@@ -69,7 +69,7 @@
 # The base url of your site, e.g. if you are using multiple nested
 # documentation build with monorepo, you might want to share the same base URL
 # for all your repo, then build link from the repo["url_slug_with_namespace"].
-#site_url: "https://my_site.tld"
+site_base_url: "https://docs.romaindeville.fr"
 
 
 # Git platform
@@ -93,5 +93,5 @@ git_platform:
   # URL of the platform you use, to be able to set `repo_url` for mkdocs
   # configuration.
   url: "https://framagit.org/"
-
 ### END MKDOCS TEMPLATE ###
+

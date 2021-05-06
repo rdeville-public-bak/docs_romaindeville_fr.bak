@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # Subrepo Information
 # ---------------------------------------------------------------------------
 # Dictionnary storing location of subrepo to be included in the main repo
@@ -75,5 +75,5 @@ subrepo:
   #     - Direnv Template: /my_program/direnv_template/
   #     - Mkdocs Template: /my_program/mkdocs_template/
   # ```
-
 ### END MKDOCS TEMPLATE ###
+

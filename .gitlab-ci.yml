@@ -15,13 +15,10 @@ workflow:
   rules:
     # Do not run CI when commit title have
     # WIP, NO-CI or 🚧 (gitmoji for "work in progress", aka :construction:)
-    - if: |
-        $CI_COMMIT_TITLE =~ /.*WIP.*/ ||
-        $CI_COMMIT_TITLE =~ /.*NO-CI.*/ ||
-        $CI_COMMIT_TITLE =~ /.*🚧.*/
+    - if: $CI_COMMIT_TITLE =~ /.*(WIP|NO-CI|🚧|:construction:).*/
       when: never
-    # Run the CI otherwise (depending on `only/except` key per jobs)
-    - when: always
+    # Do not run CI if repo is not on framagit
+    - if: $CI_SERVER_HOST =~ /^framagit.org/
 
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG ! ###
@@ -77,59 +74,31 @@ variables:
     # Activate virtual environment
     - source .venv/bin/activate
 
-# Only anchors
+# Rules anchors
 # -----------------------------------------------------------------------------
-# https://docs.gitlab.com/ee/ci/yaml/README.html#only
-# List all names of refs that can be used with key (only|except):refs using
-# anchors to avoid having to modify multiple times. Refs are:
-# - Branches names based on git flow: https://danielkummer.github.io/git-flow-cheatsheet/
-# - merge_requests (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
-# - tags (https://docs.gitlab.com/ee/ci/yaml/README.html#onlyexcept-basic)
-.refs_names:
-  - &ref_release /release-*/
-  - &ref_feature /feature-*/
-  - &ref_hotfix /hotfix-*/
-  - &ref_bugfix /bugfix-*/
-  - &ref_develop develop
-  - &ref_master master
-  - &ref_merge_requests merge_requests
-  - &ref_tags tags
+# https://docs.gitlab.com/ee/ci/yaml/README.html#rules
+# Defining bash regexp test
+.rules_regexp:
+  - &rules_regexp_dev $CI_COMMIT_BRANCH =~ /^((release|feature|hotfix|bugfix)-|merge_request_)*/
+  - &rules_regexp_pre_prod $CI_COMMIT_BRANCH =~ /(develop|master)/
+  - &rules_regexp_prod $CI_COMMIT_TAG
 
-# Specify on which branch, tags or on merge_requests CI should be done.
-# Jobs under only_dev anchor will be run if branch name are compliant with git
-# flow branch which are not `develop` neither `master` and will be run on
-# merge_request
-.only_dev: &only_dev
-  only:
-    refs:
-      - *ref_release
-      - *ref_feature
-      - *ref_hotfix
-      - *ref_bugfix
-      - *ref_merge_requests
+# Defining rules that now replace only to run jobs under specific condition
+# and define variables
+.rules_dev: &rules_dev
+  if: *rules_regexp_dev
+  variables:
+    CI_DEPLOY_TYPE: "dev"
 
-# Jobs under only_pre_prod anchor will be run on `develop` (i.e. pre-release)
-# and `master` (release) branch.
-.only_pre_prod: &only_pre_prod
-  only:
-    refs:
-      - *ref_develop
-      - *ref_master
+.rules_pre_prod: &rules_pre_prod
+  if: *rules_regexp_pre_prod
+  variables:
+    CI_DEPLOY_TYPE: "pre_prod"
 
-# Jobs under only_prod anchor will be run on tagged commit.
-.only_prod: &only_prod
-  only:
-    refs:
-      - *ref_tags
-
-# Jobs under only_trigger anchor will be run on `develop` (i.e. pre-release)
-# `master` (release) branch and tagged commit.
-.only_trigger: &only_trigger
-  only:
-    refs:
-      - *ref_develop
-      - *ref_master
-      - *ref_tags
+.rules_prod: &rules_prod
+  if: *rules_regexp_prod
+  variables:
+    CI_DEPLOY_TYPE: "prod"
 
 # Tag anchors
 # -----------------------------------------------------------------------------
@@ -165,28 +134,28 @@ variables:
 # =============================================================================
 # Jobs in test stage
 # -----------------------------------------------------------------------------
-#test_tox_format_python:
-#  <<: *tag_docker
-#  <<: *image_docker
-#  <<: *stage_test
-#  <<: *before_script_python_dependencies
-#  script:
-#    # Install python tox
-#    - pip3 install tox
-#    # Run tox
-#    - tox -e format_python
-#
-#test_tox_format_shell:
-#  <<: *tag_docker
-#  <<: *image_docker
-#  <<: *stage_test
-#  <<: *before_script_python_dependencies
-#  script:
-#    # Install python tox
-#    - pip3 install tox
-#    # Run tox
-#    - tox -e format_shell
-#
+test_tox_format_python:
+  <<: *tag_docker
+  <<: *image_docker
+  <<: *stage_test
+  <<: *before_script_python_dependencies
+  script:
+    # Install python tox
+    - pip3 install tox
+    # Run tox
+    - tox -e format_python
+
+test_tox_format_shell:
+  <<: *tag_docker
+  <<: *image_docker
+  <<: *stage_test
+  <<: *before_script_python_dependencies
+  script:
+    # Install python tox
+    - pip3 install tox
+    # Run tox
+    - tox -e format_shell
+
 # *****************************************************************************
 # VIM MODELINE
 # vim: fdm=indent

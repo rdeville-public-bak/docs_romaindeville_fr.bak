@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
-"""
-Set of method for mkdocs-macros which also update nav entry to dynamically
-support subrepo with mkdocs monorepo plugin.
+"""Set of methods to manage mkdocs configuration dynamically.
+
+Set of methods for
+[mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/) Set of
+which :
+
+- Define macros usable in jinja template
+- Update `env.conf`, i.e. mkdocs configuration based on variables files
+- Dynamically update `env` dictionary and `nav` entries to support subrepo
+  either internal subrepo, using
+  [mkdocs-monorepo-plugin](https://github.com/backstage/mkdocs-monorepo-plugin),
+  or external subrepo by using `online_url` of such subrepo.
+
+This script allow to make content of `mkdocs.yml` to be templated, i.e. using
+the same `mkdocs.yml` file for multiple repos and use variables files in
+`docs/_data/`
 """
 
 # pylint: disable=R0801
@@ -22,10 +35,6 @@ import os
 # https://docs.python.org/3/library/re.html
 import re
 
-# High-level file operations
-# https://docs.python.org/3/library/shutil.html
-import shutil
-
 # System-specific parameters and functions
 # https://docs.python.org/3/library/sys.html
 import sys
@@ -38,6 +47,10 @@ import time
 # https://pypi.org/project/GitPython/
 import git
 
+# Python implementation of Markdown
+# https://pypi.org/project/markdown/
+import markdown
+
 # YAML parser and emitter for Python
 # https://pypi.org/project/PyYAML/
 import yaml
@@ -49,13 +62,13 @@ from pykwalify.core import Core as yamlschema
 # pylint: disable=W0105
 # - W0105: String statement has no effect
 LOG = logging.getLogger(__name__)
-"""The logger facilty"""
+"""The logger facilty."""
 ERR_CLR = "\033[31m"
-"""String coloring error output in red"""
+"""String coloring error output in red."""
 INFO_CLR = "\033[32m"
-"""String coloring error output in green"""
+"""String coloring error output in green."""
 RESET_CLR = "\033[0m"
-"""String reseting coloring output"""
+"""String reseting coloring output."""
 
 
 def add_internal_to_nav(
@@ -65,8 +78,25 @@ def add_internal_to_nav(
     repo_parent: list,
     nav_parent: list = None,
 ) -> None:
-    """
-    @rdeville TODO
+    """Add internal subrepo to `nav` key of mkdocs.yml for monorepo.
+
+    This method recursively parse `nav_parent` arguments to know where to
+    include the internal subrepo into `nav` key.
+
+    Once determined, add the subrepo as a entry to the `nav` key, with the
+    format required by
+    [mkdocs-monorepo-plugin](https://github.com/backstage/mkdocs-monorepo-plugin).
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        nav : Navigation dictionary (subpart of it if called
+            recursively)
+        repo_dict : Repo dictionary from `subrepo.yml` file in `docs/_data/`
+        repo_parent : List of keys storing parent keys of the current
+            `repo_dict` from `subrepo.yml` file in `docs/_data`
+        nav_parent : List of keys storing parents `nav_entry` keys of the
+            current `repo_dict` from `subrepo.yml` file in `docs/_data`
     """
     if nav_parent:
         for i_nav in nav:
@@ -93,8 +123,24 @@ def add_internal_to_nav(
 def add_external_to_nav(
     env: dict, nav: dict, repo_dict: dict, repo_parent: list, nav_parent: list
 ) -> None:
-    """
-    @rdeville TODO
+    """Add external subrepo to `nav` key of mkdocs.yml.
+
+    This method recursively parse `nav_parent` arguments to know where to
+    include the external subrepo into `nav` key.
+
+    Once determined, add the subrepo as a entry to the `nav` key, with the
+    `online_url` key of the current subrepo defined with `repo_dict` in file
+    `subrepo.yml` in `docs/_data`.
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        nav : Navigation dictionary (subpart of it if called recursively)
+        repo_dict : Repo dictionary from `subrepo.yml` file in `docs/_data/`
+        repo_parent : List of keys storing parent keys of the current
+            `repo_dict` from `subrepo.yml` file in `docs/_data`
+        nav_parent : List of keys storing parents `nav_entry` keys of the
+            current `repo_dict` from `subrepo.yml` file in `docs/_data`
     """
     if nav_parent:
         for i_nav in nav:
@@ -112,8 +158,14 @@ def add_external_to_nav(
 
 
 def add_nav_entry(nav: list, nav_parent: list = None) -> None:
-    """
-    @rdeville TODO
+    """Create missing entry into `nav` key of `env.conf`.
+
+    Recursively parse list `nav_parent` and create missing entry into key `nav`
+    of mkdocs.yml.
+
+    Args:
+        nav : Navigation dictionary (subpart of it if called recursively)
+        nav_parent : List of keys storing parents `nav_entry` keys
     """
     entry = dict()
 
@@ -137,8 +189,30 @@ def update_nav(
     nav_parent: list = None,
     first_iteration=False,
 ) -> None:
-    """
-    @rdeville TODO
+    """Meta method which dynamically update the `nav` key of `env.conf`.
+
+    Recursively parse `repo_dict` (provided from `subrepo.yml` file in
+    `docs/_data`), depending on the content of the keys, method will:
+
+    - Update the list of `nav_parent` and `repo_parent`,
+    - Call [add_nav_entry][plugins.add_nav_entry] to add missing entry to `nav`
+      key of `mkdocs.yml`,
+    - Call [add_external_to_nav][plugins.add_external_to_nav] to add external
+      subrepo to `nav` key of `mkdocs.yml`,
+    - Call [add_internal_to_nav][plugins.add_internal_to_nav] to add internal
+      subrepo to `nav` key of `mkdocs.yml`,
+    - Recursively call itself.
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        repo_dict : Repo dictionary from `subrepo.yml` file in `docs/_data/`
+        repo_parent : List of keys storing parent keys of the current
+            `repo_dict` from `subrepo.yml` file in `docs/_data`
+        nav_parent : List of keys storing parents `nav_entry` keys of the
+            current `repo_dict` from `subrepo.yml` file in `docs/_data`
+        first_iteration : Simple boolean to know if it is the first recursive
+            call of the method.
     """
     for i_key in repo_dict:
         if not nav_parent or first_iteration:
@@ -166,17 +240,24 @@ def update_nav(
             update_nav(env, repo_dict[i_key], repo_parent, nav_parent)
 
 
-def get_repo_slug(env, git_repo):
-    """Compute the slug of the current repo and ensure repo dict is defined
+def get_repo_slug(env: dict, git_repo: git.Repo) -> str:
+    """Compute the slug of the `git_repo` and ensure repo dictionary is defined.
 
-    Compute the slug of the current repo based on the origin remote. If no remo,
-    then will use the folder name.
+    Compute the slug of the repo provided as `git_repo` based on the origin
+    remote. If no remo, then will use the folder name.
+
     Then ensure the repo dictionary is defined in `docs/_data/`. If not, print
     an error and exit.
 
+    Else, update value of `env.variables["git"]` and return the `repo_slug`.
+
     Arguments:
-        env: Mkdocs macro plugin environment dictionary.
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
         git_repo: Git python object of the current repo.
+
+    Returns:
+        Posix path from `os.path` python library.
     """
     if git_repo.remotes:
         repo_slug = (
@@ -189,7 +270,7 @@ def get_repo_slug(env, git_repo):
 
     if repo_slug not in env.variables:
         LOG.error(
-            "%s[macros] - Dictionnary %s is not defined.%s",
+            "%s[macros] - Dictionary %s is not defined.%s",
             ERR_CLR,
             repo_slug,
             RESET_CLR,
@@ -214,8 +295,16 @@ def get_repo_slug(env, git_repo):
     return repo_slug
 
 
-def set_site_name(env, repo_slug):
-    """Update content of the `site_name` key in mkdocs.yml
+def set_site_name(env: dict, repo_slug: str) -> None:
+    """Update content of the `site_name` key in `env.conf`.
+
+    Update the value of `site_name` keys for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `site_name` in `mkdocs.yml`,
+    - Value of `site_name` in `env.variables`, from `docs/_data/vars.yml`,
+    - Value of `name` in `env.variables[repo_slug]` from `docs/_data/repo.yml`.
+
 
     If `site_name` key is not defined in `mkdocs.yml` then look to
     `docs/_data/vars.yml`, if defined, else look to the the current repo
@@ -232,12 +321,15 @@ def set_site_name(env, repo_slug):
             env.conf["site_name"] = env.variables[repo_slug]["name"]
 
 
-def set_site_desc(env, repo_slug):
-    """Update content of the `site_desc` key in mkdocs.yml
+def set_site_desc(env: dict, repo_slug: str) -> None:
+    """Update content of the `site_desc` key in `env.conf`.
 
-    If `site_desc` key is not defined in `mkdocs.yml` then look to
-    `docs/_data/vars.yml`, if defined, else look to the the current repo
-    dictionary to set value of `site_desc`.
+    Update the value of `site_desc` keys for mkdocs configuration based on (in
+    precedence order):
+
+    - Value of `site_desc` in `mkdocs.yml`,
+    - Value of `site_desc` in `env.variables`, from `docs/_data/vars.yml`,
+    - Value of `desc` in `env.variables[repo_slug]` from `docs/_data/repo.yml`.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
@@ -250,12 +342,17 @@ def set_site_desc(env, repo_slug):
             env.conf["site_desc"] = env.variables[repo_slug]["desc"]
 
 
-def set_site_url(env, repo_slug):
-    """Update content of the `site_url` key in mkdocs.yml
+def set_site_url(env: dict, repo_slug: str) -> None:
+    """Update content of the `site_url` key in `env.conf`.
 
-    If `site_url` key is not defined in `mkdocs.yml` then look to
-    `docs/_data/vars.yml`, if defined, else build value from `site_base_url` and
-    the current repo dictionary.
+    Update the value of `site_url` key for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `site_url` in `mkdocs.yml`,
+    - Value of `site_url` in `env.variables`, from `docs/_data/vars.yml`,
+    - Value of `site_base_url` in `env.variables`, from `docs/_data/vars.yml`,
+      concatenate with `env.variables[repo_slug]["url_slug_with_namespace"]`
+      from `docs/_data/repo.yml`.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
@@ -272,12 +369,21 @@ def set_site_url(env, repo_slug):
             env.conf["site_url"] = site_url
 
 
-def set_copyright(env, git_repo):
-    """Update content of the `copyright` key in mkdocs.yml
+def set_copyright(env: dict, git_repo: git.Repo) -> None:
+    """Update content of the `copyright` key in `env.conf`.
 
-    If `copyright` key is not defined in `mkdocs.yml` but is defined in
-    `docs/_data/vars.yml`, this override the content of the default `copyright`
-    key in `mkdocs.yml` with date based on the first commit of the repo.
+    Update the value of `copyright` key for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `copyright` in `mkdocs.yml`,
+    - Value of `copyright` in `env.variables`, from `docs/_data/vars.yml`, then,
+      using this value:
+        - Value of the year of the first commit of the repo holding the
+          documentation and current year,
+        - Value of the current year only,
+
+    If no `copyright` key defined, neither in `mkdocs.yml`, nor in
+    `docs/_data/vars.yml`, then not copyright will be set.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
@@ -295,39 +401,51 @@ def set_copyright(env, git_repo):
             first_year = time.strftime("%Y", time.localtime())
         curr_year = time.strftime("%Y", time.localtime())
 
-        env.conf["copyright"] = "Copyright &copy; {} - {} {}".format(
-            first_year, curr_year, env.variables["copyright"]
-        )
+        env.conf[
+            "copyright"
+        ] = f"Copyright &copy; {first_year} - {curr_year} {env.variables['copyright']}"
 
 
-def set_repo_name(env, repo_slug):
-    """Update content of the `repo_url` key in mkdocs.yml
+def set_repo_name(env: dict, repo_slug: str) -> None:
+    """Update content of the `repo_name` key in `env.conf`.
 
-    If `repo_url` key is defined in `docs/_data/vars.yml`, this override the
-    content of the default `repo_url` key in `mkdocs.yml`. Else, update the
-    repo_url based on the value of `git_platform` dictionary and the dictionary
-    corresponding of the repo.
+    Update the value of `repo_name` key for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `repo_name` in `mkdocs.yml`,
+    - Value of `repo_name` in `env.variables`, from `docs/_data/vars.yml`,
+    - Value of `name` in `env.variables[repo_slug]`, from `docs/_data/repo.yml`,
+      then, depending on its value:
+      - If value is `!!git_platform`, then value of `repo_name` will be set to
+        the value of `env.variables['git_platform']['name']`, from
+        `docs/_data/vars.yml`
+      - Else, value is key `name` of `env.variables[repo_slug]
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
         repo_slug: Repo slug or name of the repo folder.
     """
-
     if "repo_name" not in env.conf or not env.conf["repo_name"]:
-        if "name" in env.variables[repo_slug]:
+        if "repo_name" in env.variables:
+            env.conf["repo_name"] = env.variables["repo_name"]
+        elif "name" in env.variables[repo_slug]:
             if env.variables[repo_slug]["name"] == "!!git_platform":
                 env.conf["repo_name"] = env.variables["git_platform"]["name"]
             else:
                 env.conf["repo_name"] = env.variables[repo_slug]["name"]
 
 
-def set_repo_url(env, repo_slug):
-    """Update content of the `repo_url` key in mkdocs.yml
+def set_repo_url(env: dict, repo_slug: str) -> None:
+    """Update content of the `repo_url` key in `env.conf`.
 
-    If `repo_url` key is defined in `docs/_data/vars.yml`, this override the
-    content of the default `repo_url` key in `mkdocs.yml`. Else, update the
-    repo_url based on the value of `git_platform` dictionary and the dictionary
-    corresponding of the repo.
+    Update the value of `repo_url` key for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `repo_url` in `mkdocs.yml`,
+    - Value of `repo_url` in `env.variables`, from `docs/_data/vars.yml`,
+    - Concatenation of the `url` of `env.variables['git_platform']`, from
+      `docs/_data/vars.yml` and value `git_slug_with_namespace` in
+      `env.variables[repo_slug]`, from `docs/_data/repo.yml`.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
@@ -337,17 +455,34 @@ def set_repo_url(env, repo_slug):
         if "repo_url" in env.variables:
             env.conf["repo_url"] = env.variables["repo_url"]
         elif "repo_url" in env.conf:
-            env.conf["repo_url"] = "{}{}".format(
-                env.variables["git_platform"]["url"],
-                env.variables[repo_slug]["git_slug_with_namespace"],
+            env.conf["repo_url"] = (
+                f"{env.variables['git_platform']['url']}"
+                + f"{env.variables[repo_slug]['git_slug_with_namespace']}"
             )
 
 
-def update_theme(env, repo_slug):
-    """Update content of the `theme` key in mkdocs.yml
+def set_nav(env: dict) -> None:
+    """Update content of the `nav` key in `env.conf`.
+
+    Update the value of `nav` key for mkdocs documentation based on (in
+    precedence order):
+
+    - Value of `nav` in `vars.yml` or `extra.yml` in `docs/_data/`, allowing
+      overloading of nav for forked repo.
+    - Value of `nav` in `mkdocs.yml`
+
+    Arguments:
+        env: Mkdocs macro plugin environment dictionary.
+    """
+    if "nav" in env.variables and env.variables["nav"]:
+        env.conf["nav"] = env.variables["nav"]
+
+
+def update_theme(env: dict, repo_slug: str) -> None:
+    """Update content of the `theme` key in `env.conf`.
 
     If `theme` key is defined in `docs/_data/vars.yml`, this override the
-    content of the default `theme` key in `mkdocs.yml`.
+    content of the default `theme` key in mkdocs documentation.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
@@ -385,19 +520,19 @@ def update_theme(env, repo_slug):
 
 
 def set_config(env: dict) -> None:
-    """Dynamically update mkdocs configuration
+    """Dynamically update mkdocs configuration.
 
-    Based on the repo slug (or folder name) load variables in
-    `docs/_data/vars.yml` and update content of mkdocs.yml accordingly.
+    Based on the `repo_slug` (or folder name) load variables in
+    `docs/_data/vars.yml`, in `docs/_data/repo.yml` and update content of mkdocs
+    documentation accordingly.
 
-    Especially, if `docs/_data/subrepo.yaml` exists and define valid subrepod,
-    dynamically add these subrepo to the `nav` key of the mkdocs.yml
+    Especially, if `docs/_data/subrepo.yaml` exists and define valid subrepos,
+    clone these subrepo and dynamically add them to the `nav` key of the mkdocs
     configuration.
 
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
     """
-
     git_repo = git.Repo(search_parent_directories=True)
     repo_slug = get_repo_slug(env, git_repo)
 
@@ -407,6 +542,7 @@ def set_config(env: dict) -> None:
     set_copyright(env, git_repo)
     set_repo_name(env, repo_slug)
     set_repo_url(env, repo_slug)
+    set_nav(env)
     update_theme(env, repo_slug)
 
     if "subrepo" in env.variables:
@@ -420,11 +556,14 @@ def set_config(env: dict) -> None:
 
 
 def load_yaml_file(path: str, filename: str) -> None:
-    """Ensure a YAML file is valid again a schema and return its content
+    """Ensure a YAML file is valid again a schema and return its content.
 
     Depending on the name of the YAML file, compare its content to a schema to
     validate its content. If content is not valid, an error will be raised.
     Otherwise, its content will be returned.
+
+    If filename is `extra.yml` or `extra.yaml`, load content of the file
+    unconditionnally.
 
     Arguments:
         path: Base path where YAML files are.
@@ -434,29 +573,64 @@ def load_yaml_file(path: str, filename: str) -> None:
     schema_file = os.path.join(path, "schema")
     data_type = ""
 
-    if filename in ("subrepo.yaml", "subrepo.yml"):
-        schema_file = os.path.join(schema_file, "subrepo.schema.yaml")
-    elif filename in ("vars.yaml", "vars.yml"):
-        schema_file = os.path.join(schema_file, "vars.schema.yaml")
+    if filename not in ("extra.yaml", "extra.yml"):
+        if filename in ("subrepo.yaml", "subrepo.yml"):
+            schema_file = os.path.join(schema_file, "subrepo.schema.yaml")
+        elif filename in ("vars.yaml", "vars.yml"):
+            schema_file = os.path.join(schema_file, "vars.schema.yaml")
+        elif filename not in ("extra.yaml", "extra.yml"):
+            schema_file = os.path.join(schema_file, "repo.schema.yaml")
+            data_type = "repo"
+        schema = yamlschema(source_file=source_file, schema_files=[schema_file])
+        schema.validate(raise_exception=True)
+        data_content = schema.source
     else:
-        schema_file = os.path.join(schema_file, "repo.schema.yaml")
-        data_type = "repo"
+        with open(source_file) as file:
+            data_content = yaml.safe_load(file)
 
-    schema = yamlschema(source_file=source_file, schema_files=[schema_file])
-    schema.validate(raise_exception=True)
-    return schema.source, data_type
+    return data_content, data_type
 
 
-def update_subrepo_logo_src(env:dict,curr_repo:dict,repo_name:str,subrepo_dict:dict, path:str,external:bool) -> None:
+# pylint: disable=R0913
+# - R0913: Too many arguments
+def update_subrepo_logo_src(
+    env: dict,
+    curr_repo: dict,
+    repo_name: str,
+    subrepo_dict: dict,
+    path: str,
+    external: bool,
+) -> None:
+    """Update the content of the key `logo` and `src_path` of subrepo.
+
+    Update value of keys `logo` and `src_path` of cloned subrepo, i.e. value
+    from file `docs/_data/repo.yaml` in the cloned subrepo, relative to the main
+    repo holding the documentation.
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        curr_repo : Repo dictionary from `repo.yml` file in `docs/_data/` in the
+            cloned subrepo,
+        repo_name: Name of the repo,
+        subrepo_dict: Dictionary of the repo as defined in file `subrepo.yaml`
+            in `docs/_data`,
+        path: Absolute path of the location of the cloned subrepo,
+        external: Boolean to know if current repo is an external subrepo.
+    """
     logo_subpath = ""
     src_subpath = ""
     if external:
         logo_subpath = os.path.join(subrepo_dict["online_url"])
 
-    src_subpath = os.path.join(path.replace(f"{env.project_dir}/",""),repo_name)
+    src_subpath = os.path.join(
+        path.replace(f"{env.project_dir}/", ""), repo_name
+    )
 
     if "logo" not in curr_repo:
-        curr_repo["logo"] = os.path.join(logo_subpath, "assets", "img", "meta",f"{repo_name}_logo.png")
+        curr_repo["logo"] = os.path.join(
+            logo_subpath, "assets", "img", "meta", f"{repo_name}_logo.png"
+        )
     if "src_path" in curr_repo:
         for i_src in curr_repo["src_path"]:
             i_src = os.path.join(src_subpath, i_src)
@@ -465,9 +639,25 @@ def update_subrepo_logo_src(env:dict,curr_repo:dict,repo_name:str,subrepo_dict:d
             ]["setup_commands"].append(f"sys.path.append('{i_src}')")
 
 
-def update_subrepo_info(env: dict, subrepo_list: dict, path: str, external:bool = False) -> dict:
-    """
-    @rdeville TODO
+def update_subrepo_info(
+    env: dict, subrepo_list: dict, path: str, external: bool = False
+) -> dict:
+    """Clone subrepo, load repo information and update values if needed.
+
+    Recursively clone or pull repo defined from subpart of
+    `env.variables['subrepo'], load repo information from this cloned or pulled
+    repo, i.e. load file `docs/_data/repo.yaml` in the subrepo, and update
+    needed keys.
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        subrepo_list: List of dictionary storing subrepo dict,
+        path: Absolute path of the location of the cloned subrepo,
+        external: Boolean to know if current repo is an external subrepo.
+
+    Return:
+        A updating dictionary storing subrepo information
     """
     return_dict = dict()
     for i_repo in subrepo_list:
@@ -496,14 +686,33 @@ def update_subrepo_info(env: dict, subrepo_list: dict, path: str, external:bool 
         data, _ = load_yaml_file(data_dir, data_file)
         for i_repo_info in data:
             curr_repo = data[i_repo_info]
-            update_subrepo_logo_src(env,curr_repo,i_repo_info,i_repo,path,external)
+            update_subrepo_logo_src(
+                env, curr_repo, i_repo_info, i_repo, path, external
+            )
         return_dict.update(data)
     return return_dict
 
 
-def update_subrepo(env: dict, subrepo_dict: dict, path: str, external:bool) -> dict:
-    """
-    @rdeville TODO
+def update_subrepo(
+    env: dict, subrepo_dict: dict, path: str, external: bool
+) -> dict:
+    """Recursively parse `env.variables['subrepo']`.
+
+    Recursively parse dictionary `env.variables['subrepo']`, from file
+    `docs/_data/subrepo.yaml`. Depending on the key:
+
+    - `nav_entry`: Do a recursion of this method,
+    - `external` or `internal`: Parse the list to update subrepo information
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        subrepo_dict: Dictionary storing subrepo,
+        path: Absolute path of the location of the cloned subrepo,
+        external: Boolean to know if current repo is an external subrepo.
+
+    Returns:
+        An updated dictionary of repo informations.
     """
     return_dict = dict()
     for i_key in subrepo_dict:
@@ -513,24 +722,44 @@ def update_subrepo(env: dict, subrepo_dict: dict, path: str, external:bool) -> d
             elif i_key == "internal":
                 env.variables["internal_subdoc"] = True
             return_dict.update(
-                update_subrepo_info(env, subrepo_dict[i_key], path,external)
+                update_subrepo_info(env, subrepo_dict[i_key], path, external)
             )
         elif i_key not in ["nav_entry"]:
             return_dict.update(
                 update_subrepo(
-                    env, subrepo_dict[i_key], os.path.join(path, i_key),external
+                    env,
+                    subrepo_dict[i_key],
+                    os.path.join(path, i_key),
+                    external,
                 )
             )
     return return_dict
 
 
-def update_logo_src_repo(env:dict,curr_repo:dict,repo_name:str,path:str=None) -> None:
+def update_logo_src_repo(
+    env: dict, curr_repo: dict, repo_name: str, path: str = None
+) -> None:
+    """Update the content of the key `logo` and `src_path` of current repo.
+
+    Update value of keys `logo` and `src_path` of current repo holding the
+    documentation.
+
+    Args:
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
+        curr_repo : Repo dictionary from `repo.yml` file in `docs/_data/` in the
+            cloned subrepo,
+        repo_name: Name of the repo,
+        path: Absolute path of the location of the current repo.
+    """
     subpath = ""
     if path:
-        subpath = os.path.join(path.replace(env.project_dir,""),repo_name)
+        subpath = os.path.join(path.replace(env.project_dir, ""), repo_name)
 
     if "logo" not in curr_repo:
-        curr_repo["logo"] = os.path.join(subpath, "assets", "img", "meta",f"{repo_name}_logo.png")
+        curr_repo["logo"] = os.path.join(
+            subpath, "assets", "img", "meta", f"{repo_name}_logo.png"
+        )
     if "src_path" in curr_repo:
         for i_src in curr_repo["src_path"]:
             i_src = os.path.join(subpath, i_src)
@@ -539,15 +768,15 @@ def update_logo_src_repo(env:dict,curr_repo:dict,repo_name:str,path:str=None) ->
             ]["setup_commands"].append(f"sys.path.append('{i_src}')")
 
 
-
 def load_var_file(env: dict) -> None:
-    """Load variables files in docs/_data/ and variable of subrepo
+    """Load variables files in `docs/_data/`.
 
-    Load every yaml files in docs/_data/, if one of the file define a `subrepo`
-    key, load every variables associated to subrepo.
+    Load every yaml files in `docs/_data/`, if one of the file define the
+    current repo, then update keys `logo` and `src_path` for the current repo.
 
     Arguments:
-        env: Mkdocs macro plugin environment dictionary.
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
     """
     var_dir = os.path.join(env.project_dir, "docs", "_data")
 
@@ -556,15 +785,22 @@ def load_var_file(env: dict) -> None:
             data, data_type = load_yaml_file(var_dir, i_file)
             for i_key in data:
                 if data_type == "repo":
-                    update_logo_src_repo(env,data[i_key],i_key)
+                    update_logo_src_repo(env, data[i_key], i_key)
                 env.variables[i_key] = data[i_key]
 
 
 def update_version(env: dict) -> None:
-    """Update docs/versions.json if last commit has a tag
+    """Parse every tags of the repo to build a `docs/versions.json`.
+
+    To emulate mike version support for gitlab, this method will parse every
+    tags of the current repo holding the current documentation to create a file
+    `versions.json` which will be put in folder `docs`.
+
+    This is mainly used for the CI to build a documentation per repo tags.
 
     Arguments:
-        env: Mkdocs macro plugin environment dictionary.
+        env : Environment dictionary provided by
+            [mkdocs-macros-plugin](https://mkdocs-macros-plugin.readthedocs.io/)
     """
     if (
         "version" not in env.variables
@@ -626,7 +862,8 @@ def update_version(env: dict) -> None:
 def define_env(env: dict) -> None:
     # pylint: disable=C0301
     # - C0301: Line to long
-    """
+    """Hook for mkdocs-macros-plugins defining variables, macros and filters.
+
     This is the hook for defining variables, macros and filters
 
     - variables: the dictionary that contains the environment variables
@@ -635,16 +872,20 @@ def define_env(env: dict) -> None:
     See
     [https://mkdocs-macros-plugin.readthedocs.io/en/latest/](https://mkdocs-macros-plugin.readthedocs.io/en/latest/)
 
+    This hooks also start the initialization of the dynamic configuration of
+    mkdocs.
+
     Arguments:
         env: Mkdocs macro plugin environment dictionary.
     """
-
     load_var_file(env)
 
     if "subrepo" in env.variables:
         env.variables["internal_subdoc"] = False
         env.variables.update(
-            update_subrepo(env, env.variables["subrepo"], env.project_dir, False)
+            update_subrepo(
+                env, env.variables["subrepo"], env.project_dir, False
+            )
         )
 
     set_config(env)
@@ -655,16 +896,29 @@ def define_env(env: dict) -> None:
     # pylint: disable=W0612
     # -  W0612: Unused variable (unused-variable)
     def subs(var: str) -> dict:
-        """Return the content of the dictionary defined by var"""
+        """Return the content of the dictionary defined by var.
+
+        Arguments:
+            var: Key in env.variables to return.
+
+        Returns:
+            The value of `env.variables[var]`.
+        """
         return env.variables[var]
 
     @env.macro
     # pylint: disable=W0612
     # -  W0612: Unused variable (unused-variable)
-    def get_repo() -> dict:
-        """Return the content of the dictionary of the current repo"""
-        git_repo = git.Repo(search_parent_directories=True)
-        return env.variables[get_repo_slug(env, git_repo)]
+    def to_html(var: str) -> dict:
+        """Convert the content of the markdown string into HTML.
+
+        Arguments:
+            var: Markdown string which need to be converted to HTML
+
+        Returns:
+            The content of the markdown converted to HTML
+        """
+        return markdown.markdown(var)
 
 
 # -----------------------------------------------------------------------------
