@@ -35,6 +35,7 @@ commands =
   # Lint python files using pylint
   bash -c '\
     pylint \
+      --disable=R0801 \
       $(find . -type f \\( \
         -name "*.py" \
         -not -path "./.*" \
@@ -45,27 +46,7 @@ commands =
   # Lint python files using flake8
   flake8
   # Ensure docstring convention (google is mkdocs rendering documentation)
-  pydocstyle --count --convention=google
-
-[testenv:format_shell]
-# Allow external commands
-allowlist_externals=
-  /usr/bin/bash
-skip_install=true
-deps =
-  -r./requirements.prod.txt
-  -r./requirements.dev.txt
-commands =
-  # Linter bash script using shellcheck
-  bash -c '\
-    shellcheck \
-      -s bash \
-      -x \
-      $(find . -type f \\( \
-        -name "*.sh" \
-        -not -path "./.*" \
-        -not -path "./python_venv/*" \\) ) '
-  bash -c 'DIRENV_ROOT="$(pwd)" ./tools/generate_source_docs.sh --dry-run'
+  pydocstyle --count --convention=google --match-dir='[^(\\.|preview)].*'
 
 
 [testenv:build_doc]
