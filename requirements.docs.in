@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # DOCUMENTATION REQUIREMENTS
 # ============================================================
 # DESCRIPTION:
@@ -15,7 +15,7 @@ mkdocs
 
 # A Material Design theme for MkDocs
 # https://pypi.org/project/mkdocs-material/
-mkdocs-material
+mkdocs-material>=7.1
 
 # Plugin for adding monorepository support in Mkdocs.
 # https://pypi.org/project/mkdocs-monorepo-plugin/
@@ -50,4 +50,12 @@ mkdocs-exclude
 # https://pypi.org/project/pykwalify/
 pykwalify
 
+# Markdown extension to wrap images in a lightbox.
+# https://github.com/g-provost/lightgallery-markdown
+git+https://github.com/g-provost/lightgallery-markdown
+
+# A Mermaid graphs plugin for mkdocs
+# https://github.com/fralau/mkdocs-mermaid2-plugin#declaring-the-superfences-extension
+mkdocs-mermaid2-plugin
 ### END MKDOCS TEMPLATE ###
+
