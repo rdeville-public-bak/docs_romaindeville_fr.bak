@@ -5,6 +5,7 @@
 .old/
 .tmp/
 my_programs/
+docs/versions.json
 
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG ! ###
