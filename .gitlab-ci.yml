@@ -145,17 +145,6 @@ test_tox_format_python:
     # Run tox
     - tox -e format_python
 
-test_tox_format_shell:
-  <<: *tag_docker
-  <<: *image_docker
-  <<: *stage_test
-  <<: *before_script_python_dependencies
-  script:
-    # Install python tox
-    - pip3 install tox
-    # Run tox
-    - tox -e format_shell
-
 # *****************************************************************************
 # VIM MODELINE
 # vim: fdm=indent
