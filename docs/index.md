@@ -50,7 +50,7 @@ platforms.
 |-----| ----| ----|
 {%- for i_repo in subrepo[i_section]["external"] %}
 {%-  set curr_repo = subs(i_repo.name) %}
-| [![!{{ curr_repo.name }}]({{ curr_repo.logo | replace('assets','latest/assets')}}){.logo} {{ curr_repo.name }}]({{ i_repo.online_url }}) | {{ to_html(curr_repo.desc) }} | [{{ git_platform.logo }} {{ git_platform.name }} ]({{ i_repo.online_url }}) |
+| [![!{{ curr_repo.name }}]({{ curr_repo.logo | replace('assets','latest/assets')}}){.logo_repo} {{ curr_repo.name }}]({{ i_repo.online_url }}) | {{ to_html(curr_repo.desc) }} | [{{ git_platform.logo }} {{ git_platform.name }} ]({{ i_repo.online_url }}) |
 {%- endfor %}
 {% endfor %}
 
