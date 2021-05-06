@@ -1,3 +1,6 @@
+### BEGIN MKDOCS TEMPLATE ###
+### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
+### Modified content will be overwritten when updating.###
 ---
 # GLOBAL CONFIGURATION
 # =============================================================================
@@ -17,8 +20,8 @@ workflow:
     # WIP, NO-CI or 🚧 (gitmoji for "work in progress", aka :construction:)
     - if: $CI_COMMIT_TITLE =~ /.*(WIP|NO-CI|🚧|:construction:).*/
       when: never
-    # Run the CI otherwise (depending on `rules` key per jobs)
-    - when: always
+    # Do not run CI if repo is not on framagit
+    - if: $CI_SERVER_HOST =~ /^framagit.org/
 
 # Stages jobs will pass through with anchors to avoid updating stage in multiple
 # place within this file. Now renaming a stage can be done directly after the
@@ -87,71 +90,17 @@ variables:
   # This could be shortened but gitlab-ci does not support bash variable substitution
   - |
     case ${CI_DEPLOY_TYPE} in
-      "DEV")
-        if [[ -n "${SSH_KNOWN_HOSTS_DEV}" ]];
-        then
-          export SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS_DEV}"
-        fi
-        if [[ -n "${SSH_PRIVATE_KEY_DEV}" ]];
-        then
-          export SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY_DEV}"
-        fi
-        if [[ -n "${ONLINE_DEST_DEV}" ]];
-        then
-          export ONLINE_DEST="${ONLINE_DEST_DEV}"
-        fi
-        if [[ -n "${RSYNC_DEST_DEV}" ]];
-        then
-          export RSYNC_DEST="${RSYNC_DEST_DEV}"
-        fi
-        if [[ -n "${RSYNC_BASE_PATH_DEV}" ]];
-        then
-          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_DEV}"
-        fi
+      "dev")
+        export RSYNC_DEST="${RSYNC_DEST}/dev/"
+        export ONLINE_DEST="${ONLINE_DEST}/dev/"
       ;;
-      "PRE_PROD")
-        if [[ -n "${SSH_KNOWN_HOSTS_PRE_PROD}" ]];
-        then
-          export SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS_PRE_PROD}"
-        fi
-        if [[ -n "${SSH_PRIVATE_KEY_PRE_PROD}" ]];
-        then
-          export SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY_PRE_PROD}"
-        fi
-        if [[ -n "${ONLINE_DEST_PRE_PROD}" ]];
-        then
-          export ONLINE_DEST="${ONLINE_DEST_PRE_PROD}"
-        fi
-        if [[ -n "${RSYNC_DEST_PRE_PROD}" ]];
-        then
-          export RSYNC_DEST="${RSYNC_DEST_PRE_PROD}"
-        fi
-        if [[ -n "${RSYNC_BASE_PATH_PRE_PROD}" ]];
-        then
-          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_PRE_PROD}"
-        fi
+      "pre_prod")
+        export RSYNC_DEST="${RSYNC_DEST}/pre_prod/"
+        export ONLINE_DEST="${ONLINE_DEST}/pre_prod/"
       ;;
-      "PROD")
-        if [[ -n "${SSH_KNOWN_HOSTS_PROD}" ]];
-        then
-          export SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS_PROD}"
-        fi
-        if [[ -n "${SSH_PRIVATE_KEY_PROD}" ]];
-        then
-          export SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY_PROD}"
-        fi
-        if [[ -n "${ONLINE_DEST_PROD}" ]];
-        then
-          export ONLINE_DEST="${ONLINE_DEST_PROD}"
-        fi
-        if [[ -n "${RSYNC_DEST_PROD}" ]];
-        then
-          export RSYNC_DEST="${RSYNC_DEST_PROD}"
-        fi
-        if [[ -n "${RSYNC_BASE_PATH_PROD}" ]];
-        then
-          export RSYNC_BASE_PATH="${RSYNC_BASE_PATH_PROD}"
-        fi
+      "prod")
+        export RSYNC_DEST="${RSYNC_DEST}/"
+        export ONLINE_DEST="${ONLINE_DEST}/"
       ;;
       *)
         echo -e "\e[31mERROR - Variable \`CI_DEPLOY_TYPE\` is not defined !"
@@ -167,23 +116,31 @@ variables:
   - &rules_regexp_dev $CI_COMMIT_BRANCH =~ /^((release|feature|hotfix|bugfix)-|merge_request_)*/
   - &rules_regexp_pre_prod $CI_COMMIT_BRANCH =~ /(develop|master)/
   - &rules_regexp_prod $CI_COMMIT_TAG
+  - &rules_regexp_trigger_main (($CI_COMMIT_BRANCH =~ /(develop|master)/) || $CI_COMMIT_TAG) && ($MAIN_PROJECT != null && $MAIN_PROJECT != $CI_PROJECT_PATH)
+  - &rules_regexp_trigger_info (($CI_COMMIT_BRANCH =~ /(develop|master)/) || $CI_COMMIT_TAG) && $MAIN_PROJECT == null
 
 # Defining rules that now replace only to run jobs under specific condition
 # and define variables
 .rules_dev: &rules_dev
   if: *rules_regexp_dev
   variables:
-    CI_DEPLOY_TYPE: "DEV"
+    CI_DEPLOY_TYPE: "dev"
 
 .rules_pre_prod: &rules_pre_prod
   if: *rules_regexp_pre_prod
   variables:
-    CI_DEPLOY_TYPE: "PRE_PROD"
+    CI_DEPLOY_TYPE: "pre_prod"
 
 .rules_prod: &rules_prod
   if: *rules_regexp_prod
   variables:
-    CI_DEPLOY_TYPE: "PROD"
+    CI_DEPLOY_TYPE: "prod"
+
+.rules_trigger_main: &rules_trigger_main
+  if: *rules_regexp_trigger_main
+
+.rules_trigger_info: &rules_trigger_info
+  if: *rules_regexp_trigger_info
 
 # Tag anchors
 # -----------------------------------------------------------------------------
@@ -267,25 +224,25 @@ script_pre_test_ensure_variable: &script_pre_test_ensure_variable
     - |
       if [[ -z "${SSH_KNOWN_HOSTS}" ]]
       then
-        echo -e "\e[31mERROR - Variable \`SSH_KNOWN_HOSTS_${CI_DEPLOY_TYPE})\` is not defined !"
+        echo -e "\e[31mERROR - Variable \`SSH_KNOWN_HOSTS)\` is not defined !"
         export ERROR="true"
       fi
     - |
       if [[ -z "${SSH_PRIVATE_KEY}" ]]
       then
-        echo -e "\e[31mERROR - Variable \`SSH_PRIVATE_KEY_${CI_DEPLOY_TYPE}\` is not defined !"
+        echo -e "\e[31mERROR - Variable \`SSH_PRIVATE_KEY\` is not defined !"
         export ERROR="true"
       fi
     - |
       if [[ -z "${ONLINE_DEST}" ]]
       then
-        echo -e "\e[31mERROR - Variable \`ONLINE_DEST_${CI_DEPLOY_TYPE}\` is not defined !"
+        echo -e "\e[31mERROR - Variable \`ONLINE_DEST\` is not defined !"
         export ERROR="true"
       fi
     - |
       if [[ -z "${RSYNC_DEST}" ]]
       then
-        echo -e "\e[31mERROR - Variable \`RSYNC_DEST_${CI_DEPLOY_TYPE}\` is not defined !"
+        echo -e "\e[31mERROR - Variable \`RSYNC_DEST\` is not defined !"
         export ERROR="true"
       fi
     - |
@@ -295,9 +252,9 @@ script_pre_test_ensure_variable: &script_pre_test_ensure_variable
         return 1
       fi
   rules:
-    - *rules_dev
-    - *rules_pre_prod
     - *rules_prod
+    - *rules_pre_prod
+    - *rules_dev
 
 # Jobs in test stage
 # -----------------------------------------------------------------------------
@@ -313,8 +270,6 @@ test_build_local:
     - pip3 install -r requirements.docs.txt
     # Build local documentation
     - mkdocs build -f mkdocs.local.yml -d site_local
-    # If everything went right, remove build site
-    - rm -rf site_local
   rules:
     - exists:
       - mkdocs.local.yaml
@@ -330,9 +285,7 @@ test_build:
     # Install python test requirements
     - pip3 install -r requirements.docs.txt
     # Build local documentation
-    - mkdocs build -d site_monorepo
-    # If everything went right, remove build site
-    - rm -rf site_monorepo
+    - mkdocs build -d site
 
 # Jobs in build stage
 # -----------------------------------------------------------------------------
@@ -371,7 +324,7 @@ script_deploy_html: &script_deploy_html
     - export LAST_TAG="${LAST_TAG%.*}"
     - |
       case "${CI_DEPLOY_TYPE}" in
-        "DEV")
+        "dev")
           if [[ -n "${RSYNC_BASE_PATH}" ]];
           then
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
@@ -379,7 +332,7 @@ script_deploy_html: &script_deploy_html
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/"
           fi
           ;;
-        "PRE_PROD")
+        "pre_prod")
           if [[ -n "${RSYNC_BASE_PATH}" ]];
           then
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/${RSYNC_BASE_PATH}/";
@@ -387,7 +340,7 @@ script_deploy_html: &script_deploy_html
             export PROJECT_PATH="/${CI_COMMIT_BRANCH}/"
           fi
           ;;
-        "PROD")
+        "prod")
           if [[ -n "${RSYNC_BASE_PATH}" ]];
           then
             export PROJECT_PATH="/${RSYNC_BASE_PATH}/";
@@ -398,12 +351,15 @@ script_deploy_html: &script_deploy_html
       esac
     - export RSYNC_PATH="${PROJECT_PATH}${LAST_TAG}"
     - export ONLINE_PATH="${ONLINE_DEST}${PROJECT_PATH}latest"
-    - echo "$PROJECT_PATH"
     - mkdir -p "tmp/${RSYNC_PATH}"
     - mv site/* "tmp/${RSYNC_PATH}/"
+    - |
+      if [[ -f "tmp/${RSYNC_PATH}/versions.json" ]]
+      then
+        cp tmp/${RSYNC_PATH}/versions.json tmp/${RSYNC_PATH}/../versions.json
+      fi
     - ln -s "${LAST_TAG}" "latest"
     - mv "latest" "tmp/${PROJECT_PATH}"
-    - rsync -avz "tmp/" "${RSYNC_DEST}"
     - echo -e "
       <!DOCTYPE html>\n
       <html>\n
@@ -420,18 +376,12 @@ script_deploy_html: &script_deploy_html
       <body>\n
         Redirecting to <a href='${ONLINE_PATH}'>${ONLINE_PATH}</a>...\n
       </body>\n
-      </html>" > index.html
-    - rsync -avz index.html "${RSYNC_DEST}${PROJECT_PATH}/"
-    - |
-      if [[ -f "site/versions.json" ]]
-      then
-        cp site/versions.json versions.json
-        rsync -avz versions.json "${RSYNC_DEST}${PROJECT_PATH}/"
-      fi
+      </html>" > tmp/${PROJECT_PATH}/index.html
+    - rsync -Oavz "tmp/" "${RSYNC_DEST}"
   rules:
-    - *rules_dev
-    - *rules_pre_prod
     - *rules_prod
+    - *rules_pre_prod
+    - *rules_dev
 
 # Jobs in post_deploy stage
 # -----------------------------------------------------------------------------
@@ -446,9 +396,7 @@ trigger_main_repo:
   variables:
     MAIN_PROJECT_CI_PATH: ${MAIN_PROJECT_CI_PATH:-"."}
   rules:
-    - *rules_pre_prod
-    - *rules_prod
-    - if: $MAIN_PROJECT && $MAIN_PROJECT != $CI_PROJECT_PATH
+    - *rules_trigger_main
 
 inform_triggers_variables:
   <<: *tag_docker
@@ -459,20 +407,19 @@ inform_triggers_variables:
       if [[ -z "${MAIN_PROJECT}" ]]
       then
        echo -e "\e[32m
-          INFO - To trigger a main repo documentation CI, you can set \n
-          INFO - variable \`MAIN_PROJECT\`. Otherwise, you have nothing\n
-          INFO - to do. If the CI you want to run is not at the root of\n
-          INFO - the repo defined by variable \`MAIN_PROJECT\`. You can\n
-          INFO - set the variable \`MAIN_PROJECT_CI_PATH\` which define\n
-          INFO - the path to the file \`gitlab-ci.yaml\` to be run in  \n
+          INFO - To trigger a main repo documentation CI, you can set \\n
+          INFO - variable \`MAIN_PROJECT\`. Otherwise, you have nothing\\n
+          INFO - to do. If the CI you want to run is not at the root of\\n
+          INFO - the repo defined by variable \`MAIN_PROJECT\`. You can\\n
+          INFO - set the variable \`MAIN_PROJECT_CI_PATH\` which define\\n
+          INFO - the path to the file \`gitlab-ci.yaml\` to be run in  \\n
           INFO - the \`MAIN_PROJECT\`."
       fi
   rules:
-    - *rules_pre_prod
-    - *rules_prod
-    - if: ! $MAIN_PROJECT
+    - *rules_trigger_info
 
 # *****************************************************************************
 # VIM MODELINE
 # vim: fdm=indent
 # *****************************************************************************
+### END MKDOCS TEMPLATE ###
