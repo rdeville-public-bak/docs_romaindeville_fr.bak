@@ -53,7 +53,7 @@ platforms.
 {%-  set name = curr_repo.name %}
 {%-  set logo = curr_repo.logo | replace('assets','latest/assets') %}
 {%-  set desc = curr_repo.desc %}
-{%-  set url = i_repo.online_url | replace('/','',1) %}
+{%-  set url = i_repo.online_url | replace('/','../',1) %}
 {%-  set git_platform_info = git_platform.logo ~ " " ~ git_platform.name  %}
 | [![{{ name }}]({{ logo }}){.logo_repo} {{ name }}]({{ url }}) | {{ to_html(desc) }} | [{{ git_platform_info }}]({{ online_url }}) |
 {%- endfor %}
