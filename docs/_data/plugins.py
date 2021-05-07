@@ -401,9 +401,19 @@ def set_copyright(env: dict, git_repo: git.Repo) -> None:
             first_year = time.strftime("%Y", time.localtime())
         curr_year = time.strftime("%Y", time.localtime())
 
+        if first_year == curr_year:
+            env.variables[
+                "date_copyright"
+            ] = f"Copyright &copy; {curr_year}"
+        else:
+            env.variables[
+                "date_copyright"
+            ] = f"Copyright &copy; {curr_year} - {curr_year}"
+
         env.conf[
             "copyright"
-        ] = f"Copyright &copy; {first_year} - {curr_year} {env.variables['copyright']}"
+        ] = f"{env.variables['date_copyright']} {env.variables['copyright']}"
+
 
 
 def set_repo_name(env: dict, repo_slug: str) -> None:
@@ -810,9 +820,9 @@ def update_version(env: dict) -> None:
         return
     git_repo = git.Repo(search_parent_directories=True)
     mike_version = list()
-    last_major = 0
-    last_minor = 0
-    last_patch = 0
+    last_major = -1
+    last_minor = -1
+    last_patch = -1
     for i_tag in git_repo.tags:
         i_tag = yaml.dump(i_tag.path)
         i_tag = re.sub(".*v", "", i_tag).split(".")
@@ -820,29 +830,31 @@ def update_version(env: dict) -> None:
         minor = int(i_tag[1])
         patch = int(i_tag[2])
         if major > last_major:
-            mike_version.append(
-                {
-                    "version": "{}.{}".format(last_major, last_minor),
-                    "title": "{}.{}.{}".format(
-                        last_major, last_minor, last_patch
-                    ),
-                    "aliases": [],
-                }
-            )
+            if last_major >= 0:
+                mike_version.append(
+                    {
+                        "version": "{}.{}".format(last_major, last_minor),
+                        "title": "{}.{}.{}".format(
+                            last_major, last_minor, last_patch
+                        ),
+                        "aliases": [],
+                    }
+                )
             last_major = major
-            last_minor = 0
+            last_minor = -1
         if minor > last_minor:
-            mike_version.append(
-                {
-                    "version": "{}.{}".format(last_major, last_minor),
-                    "title": "{}.{}.{}".format(
-                        last_major, last_minor, last_patch
-                    ),
-                    "aliases": [],
-                }
-            )
+            if last_minor >= 0:
+                mike_version.append(
+                    {
+                        "version": "{}.{}".format(last_major, last_minor),
+                        "title": "{}.{}.{}".format(
+                            last_major, last_minor, last_patch
+                        ),
+                        "aliases": [],
+                    }
+                )
             last_minor = minor
-            last_patch = 0
+            last_patch = -1
         if patch > last_patch:
             last_patch = patch
     mike_version.append(

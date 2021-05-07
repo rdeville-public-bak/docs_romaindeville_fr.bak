@@ -80,6 +80,7 @@ extra_css:
   # From: https://github.com/g-provost/lightgallery-markdown
   - theme/css/lightgallery.css
   # Define personal extra css
+  - theme/css/extra.css
   # Define colors (all materials colors RGB code)
   - theme/css/colors.css
   # Define fonts
