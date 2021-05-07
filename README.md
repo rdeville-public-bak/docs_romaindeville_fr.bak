@@ -2,7 +2,7 @@
 
   <!-- Project Title -->
   <a href="https://framagit.org/rdeville.public/docs.romaindeville.fr">
-    <img src="docs/assets/img/meta/docs.romaindeville.fr_logo.png" width="100px">
+    <img src="docs/assets/img/meta/docs_romaindeville_fr_logo.png" width="100px">
     <h1>R. Deville - Documentation</h1>
   </a>
 
