@@ -51,7 +51,7 @@ platforms.
 {%- for i_repo in subrepo[i_section]["external"] %}
 {%-  set curr_repo = subs(i_repo.name) %}
 {%-  set name = curr_repo.name %}
-{%-  set logo = curr_repo.logo | replace('assets','latest/assets') %}
+{%-  set logo = curr_repo.logo | replace('assets','latest/assets') | replace('/','../',1) %}
 {%-  set desc = curr_repo.desc %}
 {%-  set url = i_repo.online_url | replace('/','../',1) %}
 {%-  set git_platform_info = git_platform.logo ~ " " ~ git_platform.name  %}
