@@ -55,7 +55,7 @@ platforms.
 {%-  set desc = curr_repo.desc %}
 {%-  set url = i_repo.online_url %}
 {%-  set git_platform_info = git_platform.logo ~ " " ~ git_platform.name  %}
-| [![{{ name }}]({{ logo | replace('assets','latest/assets')}}){.logo_repo} {{ name }}]({{ url }}) | {{ to_html(desc) }} | [{{ git_platform_info }}]({{ online_url }}) |
+| [![{{ name }}]({{ logo }}){.logo_repo} {{ name }}]({{ url }}) | {{ to_html(desc) }} | [{{ git_platform_info }}]({{ online_url }}) |
 {%- endfor %}
 {% endfor %}
 
