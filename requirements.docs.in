@@ -1,4 +1,5 @@
 
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
@@ -57,5 +58,10 @@ git+https://github.com/g-provost/lightgallery-markdown
 # A Mermaid graphs plugin for mkdocs
 # https://github.com/fralau/mkdocs-mermaid2-plugin#declaring-the-superfences-extension
 mkdocs-mermaid2-plugin
+
+# A MkDocs plugin for dynamic page redirects to prevent broken links.
+# https://pypi.org/project/mkdocs-redirects/
+mkdocs-redirects
 ### END MKDOCS TEMPLATE ###
+
 
