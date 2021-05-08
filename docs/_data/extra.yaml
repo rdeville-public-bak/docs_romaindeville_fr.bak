@@ -1,0 +1,6 @@
+# Extra variables
+my_programs:
+  desc: >-
+    This is the set of all programs I developped at first for myself but which
+    can be usefull to anyone (or not).
+  logo: assets/img/sections/my_programs.png
