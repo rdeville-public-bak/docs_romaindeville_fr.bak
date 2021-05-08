@@ -4,7 +4,7 @@
 .tmuxinator.yml
 .old/
 .tmp/
-my_programs/
+my_programs/**
 docs/versions.json
 
 ### BEGIN MKDOCS TEMPLATE ###
