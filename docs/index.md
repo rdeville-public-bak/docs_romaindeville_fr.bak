@@ -50,11 +50,11 @@ platforms.
 {%-   if subs(i_section) %}
 {%-     set section_logo = section_info.logo %}
 {%-     set section_desc = section_info.desc %}
-# ![{{ section_name }}]({{ section_logo }}){.logo_section} {{ section_name}}
+# [![{{ section_name }}]({{ section_logo }}){.logo_section} {{ section_name}}][{{ i_section }}]
 
 {{ section_desc }}
 {%-   else %}
-# {{ section_name }}
+# [{{ section_name }}][{{ i_section }}]
 {%-   endif %}
 
 | Name | Description | Repo |
@@ -68,6 +68,8 @@ platforms.
 {%-     set git_platform_info = git_platform.logo ~ " " ~ git_platform.name  %}
 | [![{{ name }}]({{ logo }}){.logo_repo} {{ name }}]({{ url }}) | {{ to_html(desc) }} | [{{ git_platform_info }}]({{ online_url }}) |
 {%-   endfor %}
+
+[{{ i_section }}]: {{ i_section }}/
 {%- endfor %}
 
 
