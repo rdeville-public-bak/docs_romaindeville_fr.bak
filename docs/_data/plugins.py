@@ -153,6 +153,10 @@ def add_external_to_nav(
                         repo_parent,
                         nav_parent[1:],
                     )
+    elif repo_dict["online_url"].startswith('/'):
+        nav.append({
+            repo_dict["nav_entry"]: repo_dict["online_url"].replace('/','../',1)
+        })
     else:
         nav.append({repo_dict["nav_entry"]: repo_dict["online_url"]})
 
@@ -914,9 +918,11 @@ def define_env(env: dict) -> None:
             var: Key in env.variables to return.
 
         Returns:
-            The value of `env.variables[var]`.
+            The value of `env.variables[var]` if it exists, else return None.
         """
-        return env.variables[var]
+        if var in env.variables:
+            return env.variables[var]
+        return None
 
     @env.macro
     # pylint: disable=W0612
