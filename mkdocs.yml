@@ -294,8 +294,29 @@ plugins:
 
 nav:
   - Home: index.md
+  - GRidOG:
+    - gridog/index.md
   - My Programs:
     - my_programs/index.md
+  - My Dotfiles:
+    - my_dotfiles/index.md
+  - My Documents:
+    - my_documents/index.md
+  - Developers Guides:
+    - dev_guides/index.md
+    - Developers guidelines: dev_guides/developer_guidelines.md
+    - Syntax guide:
+      - dev_guides/style_guides/index.md
+      - Documentation Guide:
+        - dev_guides/style_guides/doc_guide/index.md
+        - Philosophy: dev_guides/style_guides/doc_guide/philosophy.md
+        - Documentation Best Practices: dev_guides/style_guides/doc_guide/doc_best_practices.md
+        - Markdown: dev_guides/style_guides/doc_guide/markdown.md
+      - Shell Scripts: dev_guides/style_guides/shellguide.md
+    - Tutorials:
+      - dev_guides/tutorials/index.md
+      - Update Documentation: dev_guides/tutorials/update_documentation.md
+      - Update CI: dev_guides/tutorials/update_ci.md
   - About:
     - about/index.md
     - Code of Conduct: about/code_of_conduct.md
