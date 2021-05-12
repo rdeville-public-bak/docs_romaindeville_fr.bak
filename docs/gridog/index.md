@@ -4,7 +4,7 @@ hide:
 ---
 
 
-{%- set i_section = "my_programs" %}
+{%- set i_section = "gridog" %}
 {%- if subrepo[i_section] %}
 {%-   set section_name = subrepo[i_section]['nav_entry'] %}
 {%-   set section_info = subs(i_section) %}
