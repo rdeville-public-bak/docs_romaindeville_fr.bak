@@ -1,6 +1,37 @@
 # Extra variables
 my_programs:
-  desc: >-
+  desc: |
     This is the set of all programs I developped at first for myself but which
     can be usefull to anyone (or not).
   logo: /assets/img/sections/my_programs.png
+my_dotfiles:
+  desc: |
+    This is the set of all my dotfiles I managed with [vcsh][vcsh]. I usually
+    have one repo per type of dotfiles to be able to choose which dotfiles to
+    install on each my computer.
+
+    Asumming you have installed [vcsh][vcsh], to install my dotfiles, simply
+    use the following command `vcsh clone <REPO_URL>`.
+
+    [vcsh]: https://github.com/RichiH/vcsh
+  logo: /assets/img/sections/my_dotfiles.png
+my_documents:
+  desc: |
+    This is the set of all repos hosting documents I may have created for
+    lessons, conferences, etc., such as slides or tutorials.
+  logo: /assets/img/sections/my_documents.png
+gridog:
+  desc: |
+    This is the set of repos for my GRidOG projects allowing to host your
+    own mail, git server, personal cloud, etc.
+
+    The aims of this project is to provide tutorials and other subrepos
+    to setup your own personal cloud which can replace almost every Google
+    services.
+
+    Moreover another aims is to try to make the management of personal cloud
+    almost entirely automatic such as even not computer science specialist
+    (such as your grandmother or your grandfather) could be able to maintain
+    it.
+
+  logo: /assets/img/sections/gridog.png

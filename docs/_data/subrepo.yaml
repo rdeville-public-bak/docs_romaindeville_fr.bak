@@ -47,6 +47,13 @@ subrepo:
 
   # Below is a short example used for the rendering of
   # `docs.romaindeville.fr`
+  gridog:
+    nav_entry: GRidOG
+#    external:
+#      - name: mkdocs_template
+#        nav_entry: Mkdocs Template
+#        git_url: https://framagit.org/rdeville.public/my_programs/mkdocs_template.git
+#        online_url: /my_programs/mkdocs_template
   my_programs:
     nav_entry: My Programs
     external:
@@ -62,18 +69,20 @@ subrepo:
         nav_entry: Direnv Template
         git_url: https://framagit.org/rdeville.public/my_programs/direnv_template.git
         online_url: /my_programs/direnv_template
+  my_documents:
+    nav_entry: My Documents
+#    external:
+#      - name: mkdocs_template
+#        nav_entry: Mkdocs Template
+#        git_url: https://framagit.org/rdeville.public/my_programs/mkdocs_template.git
+#        online_url: /my_programs/mkdocs_template
+  my_dotfiles:
+    nav_entry: My Dotfiles
+#    external:
+#      - name: mkdocs_template
+#        nav_entry: Mkdocs Template
+#        git_url: https://framagit.org/rdeville.public/my_programs/mkdocs_template.git
+#        online_url: /my_programs/mkdocs_template
 
-  # This example will allow to add the following content to the `nav` key
-  # ```
-  # nav:
-  #   [...]
-  #   - My Dotfiles:
-  #     # Monorepo will include following mkdocs.yaml
-  #     - MyRepos Template: !include my_dotfiles/myrepos/mkdocs.yaml
-  #   - My Programs:
-  #     # A link will be provided to the external documentation
-  #     - Direnv Template: /my_program/direnv_template/
-  #     - Mkdocs Template: /my_program/mkdocs_template/
-  # ```
 
 ### END MKDOCS TEMPLATE ###
