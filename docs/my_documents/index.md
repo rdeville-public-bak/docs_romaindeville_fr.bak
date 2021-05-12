@@ -10,7 +10,7 @@ hide:
 {%-   set section_info = subs(i_section) %}
 
 {%-   if subs(i_section) %}
-{%-     set section_logo = section_info.logo %}
+{%-     set section_logo = section_info.logo | replace("/","../",1) %}
 {%-     set section_desc = to_html(section_info.desc) %}
 # ![{{ section_name }}]({{ section_logo }}){.logo_section} {{section_name}}
 
@@ -19,7 +19,7 @@ hide:
 # {{ section_name }}
 {%-   endif %}
 
-{%-   if i_repo in subrepo[i_section]["external"] or i_repo in subrepo[i_section]["internal"] %}
+{%-   if subrepo[i_section]["external"] or subrepo[i_section]["internal"] %}
 | Name | Description | Repo |
 |-----| ----| ----|
 {%-     for i_repo in subrepo[i_section]["external"] %}
