@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # Repo information
 # ===========================================================================
 # First key MUST be the "slug" of the repo based on the remote, i.e. if remote
@@ -47,5 +47,5 @@ repo_name:
   maintainers:
     - name: "Firstname Lastname"
       mail: "mail@domain.tld"
-
 ### END MKDOCS TEMPLATE ###
+

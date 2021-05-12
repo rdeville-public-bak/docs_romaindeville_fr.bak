@@ -1,7 +1,7 @@
+
 ### BEGIN MKDOCS TEMPLATE ###
 ### WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !###
 ### Modified content will be overwritten when updating.###
-
 # Schema to validate vars.yml
 type: map
 mapping:
@@ -89,5 +89,5 @@ mapping:
         required: true
         example: >-
           Key `url` is a URL and is required
-
 ### END MKDOCS TEMPLATE ###
+

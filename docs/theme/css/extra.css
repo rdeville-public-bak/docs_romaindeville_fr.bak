@@ -1,0 +1,18 @@
+/* BEGIN MKDOCS TEMPLATE */
+/* WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !*/
+/* Modified content will be overwritten when updating.*/
+.image-center {
+  display : block;
+  margin  : auto;
+}
+/* END MKDOCS TEMPLATE */
+
+.logo_repo {
+  vertical-align : middle;
+  height         : 25px !important;
+}
+
+.logo_section {
+  vertical-align : middle;
+  height         : 50px !important;
+}
