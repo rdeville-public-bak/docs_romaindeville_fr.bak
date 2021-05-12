@@ -34,7 +34,9 @@ docs_romaindeville_fr:
   #logo: "assets/img/meta/repo_template_logo.png"
   # Description of the repo, will be used to setup the mkdocs description.
   desc: >-
-    Welcome to the home page listing the documentation entrypoint of all my projects.
+    Welcome to the home page of documentations of all my projects. Below is a list
+    of projects grouped by categories, which also are the group names on [
+    Framagit/Romain Deville - Public](https://framagit.org/rdeville.public)
 
   # (OPTIONAL) If you plan to use `mkdocstring` plugins to render python
   # source code, you will need to provide the path where your source files
