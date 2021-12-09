@@ -6,6 +6,7 @@ hide:
 
 {% set curr_repo=subs("docs_romaindeville_fr") %}
 
+
 <!-- BEGIN MKDOCS TEMPLATE -->
 <!--
 WARNING, DO NOT UPDATE CONTENT BETWEEN MKDOCS TEMPLATE TAG !
@@ -15,7 +16,7 @@ Modified content will be overwritten when updating
 <div align="center">
 
   <!-- Project Title -->
-  <a href="{{ git_platform.url }}{{ curr_repo.repo_path_with_namespace }}">
+  <a href="{{ git_platform.url }}{{ curr_repo.git_slug_with_namespace }}">
     <img src="{{ curr_repo.logo }}" width="200px">
     <h1>{{ curr_repo.name }}</h1>
   </a>
@@ -40,6 +41,7 @@ platforms.
 </div>
 
 <!-- END MKDOCS TEMPLATE -->
+
 
 {%- for i_section in subrepo %}
 {%-   set section_name = subrepo[i_section]['nav_entry'] %}
