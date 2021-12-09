@@ -41,10 +41,16 @@ theme:
   # as flags and can be enabled by listing them in mkdocs.yml under
   # theme.features:
   features:
-    - navigation.tabs
+    - content.code.annotate
+    - navigation.indexes
     - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
-  # Setting colors palette (these are defined in docs/theme/css/{colors,theme}.css)
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+  # Setting colors palette
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"
@@ -148,12 +154,8 @@ markdown_extensions:
       nbsp: True
   - pymdownx.critic:
   - pymdownx.emoji:
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
-      options:
-        image_path: /assets/twemoji/svg/
-        custom_icons:
-          - .icons
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite:
       custom_inline:
         - name: math
@@ -239,9 +241,6 @@ plugins:
   - git-revision-date-localized:
       locale: en
       fallback_to_build_date: true
-    # https://github.com/oprypin/mkdocs-section-index
-    # MkDocs plugin to allow clickable sections that lead to an index page
-  - section-index:
     # https://github.com/apenwarr/mkdocs-exclude
     # A mkdocs plugin that lets you exclude files or trees.
   - exclude:

@@ -21,7 +21,7 @@ docs_romaindeville_fr:
 
   # The complete path of the repo from the git_platform["url"]. For instance,
   # using, above remote, the entry will be `username/repo_name.git`
-  git_slug_with_namespace: "rdeville.public/docs.romaindeville.fr.git"
+  git_slug_with_namespace: "rdeville.public/docs_romaindeville_fr.git"
 
   # If the repo documentation is part of a bigger repo, then provide the
   # path of the rendered documentation. If the documentation is not part of

@@ -28,10 +28,10 @@ platforms.
 
 --------------------------------------------------------------------------------
 
-[repo_url]: https://framagit.org/rdeville.public/docs.romaindeville.fr
+[repo_url]: https://framagit.org/rdeville.public/docs_romaindeville_fr
 [license_badge]: https://img.shields.io/badge/License-MIT%2FBeer%20Ware-blue?style=flat-square&logo=open-source-initiative
-[build_status_badge]: https://framagit.org/rdeville.public/docs.romaindeville.fr/badges/master/pipeline.svg?style=flat-square&logo=appveyor
-[build_status]: https://framagit.org/rdeville.public/docs.romaindeville.fr/commits/master
+[build_status_badge]: https://framagit.org/rdeville.public/docs_romaindeville_fr/badges/master/pipeline.svg?style=flat-square&logo=appveyor
+[build_status]: https://framagit.org/rdeville.public/docs_romaindeville_fr/commits/master
 
 ## Table of Content
 
@@ -54,8 +54,8 @@ documentation is jointly stored within the repository).
 
 To do so, you will need the following requirements:
 
-  - Python >= 3.8
-  - Pip3 with Python >= 3.8
+  * Python >= 3.8
+  * Pip3 with Python >= 3.8
 
 First setup a temporary python virtual environment and activate it:
 
@@ -65,6 +65,7 @@ python3 -m venv .temporary_venv
 # Activate it
 source .temporary_venv/bin/activate
 ```
+
 Now, install required dependencies to render the documentation using
 [mkdocs][mkdocs] in the python virtual environment:
 

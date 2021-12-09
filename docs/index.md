@@ -39,8 +39,6 @@ platforms.
 
 </div>
 
---------------------------------------------------------------------------------
-
 <!-- END MKDOCS TEMPLATE -->
 
 {%- for i_section in subrepo %}
